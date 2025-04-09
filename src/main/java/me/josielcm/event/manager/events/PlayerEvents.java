@@ -1,0 +1,31 @@
+package me.josielcm.event.manager.events;
+
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+
+import me.josielcm.event.Cl3vent;
+
+public class PlayerEvents implements Listener {
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent ev) {
+        Cl3vent.getInstance().getEventManager().getPlayers().add(ev.getPlayer().getUniqueId());
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent ev) {
+        Cl3vent.getInstance().getEventManager().getPlayers().remove(ev.getPlayer().getUniqueId());
+
+        switch (Cl3vent.getInstance().getEventManager().getActualGame()) {
+            case CAKEFEVER:
+                Cl3vent.getInstance().getEventManager().getCakeFever().getPoints().remove(ev.getPlayer().getUniqueId());
+                break;
+        
+            default:
+                break;
+        }
+    }
+    
+}

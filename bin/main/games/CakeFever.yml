@@ -1,0 +1,20 @@
+settings:
+  title: "<gold>LA FIEBRE DE LA TORTA</gold>"
+  limit-elimination: 20
+  world: vacio
+  spawn:
+    x: 0
+    y: 90
+    z: 0
+  
+
+cake-spawns:
+  0:
+    x: 0
+    y: 90
+    z: 0
+  1:
+    x: 1
+    y: 90
+    z: 1
+
