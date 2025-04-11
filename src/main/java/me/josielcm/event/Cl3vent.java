@@ -46,6 +46,8 @@ public final class Cl3vent extends JavaPlugin {
         FileManager.debug();
 
         eventManager = new EventManager();
+        eventManager.instanceSpawn();
+        eventManager.instanceGames();
 
         setupCommands();
         registerEvents();
