@@ -207,6 +207,8 @@ public class CakeFever {
             });
             player.sendRichMessage("<red>-" + RandomUtils.randomInt(1, 3) + "</red>");
         }
+
+        player.sendRichMessage("<gray>Points: " + points.get(playerId) + "</gray>");
     }
 
     public void regenerateCakes() {
