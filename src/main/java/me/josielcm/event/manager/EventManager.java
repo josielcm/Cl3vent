@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -24,6 +25,7 @@ import me.josielcm.event.api.regions.Container;
 import me.josielcm.event.manager.games.GameType;
 import me.josielcm.event.manager.games.balloonparkour.BalloonParkour;
 import me.josielcm.event.manager.games.cakefever.CakeFever;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import net.kyori.adventure.title.Title.Times;
 
@@ -65,7 +67,8 @@ public class EventManager {
         }
 
         spawn = new Location(Bukkit.getWorld(worldS), xSpawn, ySpawn, zSpawn);
-        Log.log(LogLevel.INFO, "Spawn loaded at " + spawn.getBlockX() + ", " + spawn.getBlockY() + ", " + spawn.getBlockZ());
+        Log.log(LogLevel.INFO,
+                "Spawn loaded at " + spawn.getBlockX() + ", " + spawn.getBlockY() + ", " + spawn.getBlockZ());
     }
 
     public void instanceGames() {
@@ -113,7 +116,7 @@ public class EventManager {
         }
 
         spawn = new Location(Bukkit.getWorld(worldS), xSpawn, ySpawn, zSpawn);
-        HashMap<Integer, Location> checkpoints = new HashMap<>();
+        ConcurrentHashMap<Integer, Location> checkpoints = new ConcurrentHashMap<>();
         for (String key : FileManager.getBalloonparkour().getConfigurationSection("checkpoints").getKeys(false)) {
             int xCheckpoint = FileManager.getBalloonparkour().getInt("checkpoints." + key + ".x");
             int yCheckpoint = FileManager.getBalloonparkour().getInt("checkpoints." + key + ".y");
@@ -125,18 +128,15 @@ public class EventManager {
 
         int xSafeContainerPos1 = FileManager.getBalloonparkour().getInt("safe.pos1.x");
         int ySafeContainerPos1 = FileManager.getBalloonparkour().getInt("safe.pos1.y");
-        int zSafeContainerPos1 = FileManager.getBalloonparkour().getInt("safe.pos1.x");
+        int zSafeContainerPos1 = FileManager.getBalloonparkour().getInt("safe.pos1.z");
 
         int xSafeContainerPos2 = FileManager.getBalloonparkour().getInt("safe.pos2.x");
         int ySafeContainerPos2 = FileManager.getBalloonparkour().getInt("safe.pos2.y");
-        int zSafeContainerPos2 = FileManager.getBalloonparkour().getInt("safe.pos2.x");
+        int zSafeContainerPos2 = FileManager.getBalloonparkour().getInt("safe.pos2.z");
 
         Container safeContainer = new Container(
-            new Location(Bukkit.getWorld(worldS), xSafeContainerPos1, ySafeContainerPos1, zSafeContainerPos1),
-            new Location(Bukkit.getWorld(worldS), xSafeContainerPos2, ySafeContainerPos2, zSafeContainerPos2)
-        );
-
-
+                new Location(Bukkit.getWorld(worldS), xSafeContainerPos1, ySafeContainerPos1, zSafeContainerPos1),
+                new Location(Bukkit.getWorld(worldS), xSafeContainerPos2, ySafeContainerPos2, zSafeContainerPos2));
 
         balloonParkour = new BalloonParkour();
         balloonParkour.setTitle(title);
@@ -156,6 +156,9 @@ public class EventManager {
             return;
         }
 
+        this.actualGame = gameType;
+        this.inGame = true;
+
         switch (gameType) {
             case CAKEFEVER:
                 cakeFever.prepare();
@@ -166,7 +169,6 @@ public class EventManager {
             default:
                 break;
         }
-
     }
 
     public void stopGame() {
@@ -212,48 +214,46 @@ public class EventManager {
     }
 
     public void sendActionBar(String message) {
-        players.forEach(player -> {
-            Player p = Bukkit.getPlayer(player);
-
+        // Pre-procesar el mensaje una sola vez
+        Component parsedMessage = Color.parse(message);
+        
+        // Usar un ciclo más eficiente
+        for (UUID playerId : players) {
+            Player p = Bukkit.getPlayer(playerId);
             if (p != null) {
-                p.sendActionBar(Color.parse(message));
+                p.sendActionBar(parsedMessage);
             }
-
-        });
+        }
     }
 
     public void sendMessage(String message) {
-        players.forEach(player -> {
-            Player p = Bukkit.getPlayer(player);
-
+        // Pre-procesar el mensaje una sola vez
+        Component parsedMessage = Color.parse(message);
+        
+        for (UUID playerId : players) {
+            Player p = Bukkit.getPlayer(playerId);
             if (p != null) {
-                p.sendMessage(Color.parse(message));
+                p.sendMessage(parsedMessage);
             }
-
-        });
+        }
     }
 
     public void showTitle(String title, String subtitle, int fadeIn, int stay, int fadeOut) {
-        players.forEach(player -> {
-            Player p = Bukkit.getPlayer(player);
-
+        // Pre-procesar componentes una sola vez
+        Component parsedTitle = Color.parse(title);
+        Component parsedSubtitle = Color.parse(subtitle);
+        Times times = Times.times(
+                Duration.ofSeconds(fadeIn),
+                Duration.ofSeconds(stay),
+                Duration.ofSeconds(fadeOut));
+        Title titleObj = Title.title(parsedTitle, parsedSubtitle, times);
+        
+        for (UUID playerId : players) {
+            Player p = Bukkit.getPlayer(playerId);
             if (p != null) {
-                Times times = Times.times(
-                    Duration.ofSeconds(fadeIn),
-                    Duration.ofSeconds(stay),
-                    Duration.ofSeconds(fadeOut)
-                );
-
-                Title titleC = Title.title(
-                    Color.parse(title),
-                    Color.parse(subtitle),
-                    times
-                );
-
-                p.showTitle(titleC);
+                p.showTitle(titleObj);
             }
-
-        });
+        }
     }
 
     public void playSound(Sound sound) {

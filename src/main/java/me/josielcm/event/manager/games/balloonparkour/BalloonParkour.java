@@ -1,9 +1,11 @@
 package me.josielcm.event.manager.games.balloonparkour;
 
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -26,11 +28,11 @@ public class BalloonParkour {
     
     @Getter
     @Setter
-    private HashMap<Integer, Location> checkpoints = new HashMap<>();
+    private ConcurrentHashMap<Integer, Location> checkpoints = new ConcurrentHashMap<>();
 
     @Getter
     @Setter
-    private HashMap<UUID, Integer> players = new HashMap<>();
+    private ConcurrentHashMap<UUID, Integer> players = new ConcurrentHashMap<>();
 
     @Getter
     @Setter
@@ -50,11 +52,11 @@ public class BalloonParkour {
 
     @Getter
     @Setter
-    private Set<UUID> noElimination = new HashSet<>();
+    private Set<UUID> noElimination = ConcurrentHashMap.newKeySet();
 
     @Getter
     @Setter
-    private HashMap<UUID, Boolean> visibility = new HashMap<>();
+    private ConcurrentHashMap<UUID, Boolean> visibility = new ConcurrentHashMap<>();
 
     @Getter
     @Setter
@@ -65,50 +67,91 @@ public class BalloonParkour {
     private Listener listener;
 
     public void prepare() {
-        listener = new BalloonParkourEvents();
+        // Crear el listener
+        BalloonParkourEvents eventListener = new BalloonParkourEvents();
+        this.listener = eventListener;
+        
+        // Inicializar caché y registrar eventos
+        eventListener.initCheckpointCache();
         Bukkit.getPluginManager().registerEvents(listener, Cl3vent.getInstance());
-
-        // Cl3vent.getInstance().getEventManager().showTitle(title, "", 1, 3, 1);
-
+        
+        // Pre-clear collections
         players.clear();
         noElimination.clear();
         visibility.clear();
-
-        Cl3vent.getInstance().getEventManager().getPlayers().forEach(player -> {
-            Player p = Bukkit.getPlayer(player);
-
-            players.put(player, -1);
-            visibility.put(player, true);
-
-
+        
+        // Cache plugin instance to reduce method calls
+        final Cl3vent plugin = Cl3vent.getInstance();
+        final Set<UUID> eventPlayers = plugin.getEventManager().getPlayers();
+        
+        // Process players in batches
+        List<Player> validPlayers = new ArrayList<>();
+        List<UUID> invalidPlayers = new ArrayList<>();
+        
+        for (UUID playerId : eventPlayers) {
+            Player p = Bukkit.getPlayer(playerId);
             if (p != null) {
-                p.teleport(spawn);
+                players.put(playerId, -1);
+                visibility.put(playerId, true);
+                validPlayers.add(p);
             } else {
-                Cl3vent.getInstance().getEventManager().getPlayers().remove(player);
+                invalidPlayers.add(playerId);
             }
-        });
-
+        }
+        
+        // Teleport players in batches with a slight delay to spread load
+        if (!validPlayers.isEmpty()) {
+            final int BATCH_SIZE = 20;
+            for (int i = 0; i < validPlayers.size(); i += BATCH_SIZE) {
+                final int batchIndex = i;
+                Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                    int end = Math.min(batchIndex + BATCH_SIZE, validPlayers.size());
+                    for (int j = batchIndex; j < end; j++) {
+                        validPlayers.get(j).teleport(spawn);
+                    }
+                }, i/BATCH_SIZE);
+            }
+        }
+        
+        // Clean up invalid players
+        if (!invalidPlayers.isEmpty()) {
+            eventPlayers.removeAll(invalidPlayers);
+        }
+        
         start();
     }
 
     public void start() {
-        giveItems();
-
-        task = Bukkit.getScheduler().runTaskTimer(Cl3vent.getInstance(), new Runnable() {
-            int time = 30;
-
-            @Override
-            public void run() {
-                if (time <= 0) {
-                    stop();
-                    return;
-                }
-
-                Cl3vent.getInstance().getEventManager().sendActionBar("Time: " + time);
-                time--;
+        // Give items with batch processing
+        giveItemsOptimized();
+        
+        // More efficient timer implementation
+        final Cl3vent plugin = Cl3vent.getInstance();
+        final AtomicInteger time = new AtomicInteger(30);
+        
+        task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            int currentTime = time.getAndDecrement();
+            if (currentTime <= 0) {
+                stop();
+                return;
+            }
+            
+            // Pre-construct action bar message once per tick
+            String message = "Time: " + currentTime;
+            plugin.getEventManager().sendActionBar(message);
+            
+            // Every 5 seconds, run garbage collection hint
+            if (currentTime % 5 == 0) {
+                Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> System.gc());
             }
         }, 0L, 20L);
 
+        // Cada minuto, limpiar caché
+        Bukkit.getScheduler().runTaskTimer(Cl3vent.getInstance(), () -> {
+            if (listener instanceof BalloonParkourEvents) {
+                ((BalloonParkourEvents) listener).cleanupCache();
+            }
+        }, 20*60L, 20*60L); // Ejecutar cada minuto
     }
 
     public void stop() {
@@ -156,7 +199,8 @@ public class BalloonParkour {
         }
     }
 
-    public void giveItems() {
+    public void giveItemsOptimized() {
+        // Pre-create all items once
         ItemStack checkpointItem = ItemBuilder.builder()
                 .material(Material.NETHER_STAR)
                 .displayName("<aqua>Regresar al ultimo checkpoint")
@@ -174,19 +218,82 @@ public class BalloonParkour {
                 .displayName("<aqua>Impulso")
                 .pdc(Key.getParkourItemsKey(), "impulse")
                 .build();
-
-        Cl3vent.getInstance().getEventManager().getPlayers().forEach(player -> {
-            Player p = Bukkit.getPlayer(player);
-
+        
+        final Cl3vent plugin = Cl3vent.getInstance();
+        Set<UUID> eventPlayers = plugin.getEventManager().getPlayers();
+        List<Player> validPlayers = new ArrayList<>();
+        List<UUID> invalidPlayers = new ArrayList<>();
+        
+        // First gather valid players
+        for (UUID playerId : eventPlayers) {
+            Player p = Bukkit.getPlayer(playerId);
             if (p != null && !p.hasPermission("cl3vent.bypass")) {
-                p.getInventory().clear();
-                p.getInventory().setItem(0, checkpointItem);
-                p.getInventory().setItem(4, impulse);
-                p.getInventory().setItem(8, toggleVisibilityItem);
-            } else {
-                Cl3vent.getInstance().getEventManager().getPlayers().remove(player);
+                validPlayers.add(p);
+            } else if (p == null) {
+                invalidPlayers.add(playerId);
             }
-        });
+        }
+        
+        // Process in batches with slight delays
+        if (!validPlayers.isEmpty()) {
+            final int BATCH_SIZE = 20;
+            for (int i = 0; i < validPlayers.size(); i += BATCH_SIZE) {
+                final int batchIndex = i;
+                Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                    int end = Math.min(batchIndex + BATCH_SIZE, validPlayers.size());
+                    for (int j = batchIndex; j < end; j++) {
+                        Player player = validPlayers.get(j);
+                        player.getInventory().clear();
+                        player.getInventory().setItem(0, checkpointItem.clone());
+                        player.getInventory().setItem(4, impulse.clone());
+                        player.getInventory().setItem(8, toggleVisibilityItem.clone());
+                    }
+                }, i/BATCH_SIZE);
+            }
+        }
+        
+        // Clean up invalid players
+        if (!invalidPlayers.isEmpty()) {
+            eventPlayers.removeAll(invalidPlayers);
+        }
+    }
+
+    public void updatePlayerVisibility(Player player, boolean visible) {
+        visibility.put(player.getUniqueId(), visible);
+        
+        // Schedule this as a delayed task to not block the main thread
+        Bukkit.getScheduler().runTaskLater(Cl3vent.getInstance(), () -> {
+            // Process visibility changes in chunks to reduce lag spikes
+            List<Player> activePlayers = new ArrayList<>();
+            for (UUID uuid : Cl3vent.getInstance().getEventManager().getPlayers()) {
+                Player target = Bukkit.getPlayer(uuid);
+                if (target != null && target != player && !target.hasPermission("cl3vent.bypass")) {
+                    activePlayers.add(target);
+                }
+            }
+            
+            // Process in batches
+            final int BATCH_SIZE = 20;
+            for (int i = 0; i < activePlayers.size(); i += BATCH_SIZE) {
+                final int startIdx = i;
+                Bukkit.getScheduler().runTaskLater(Cl3vent.getInstance(), () -> {
+                    int endIdx = Math.min(startIdx + BATCH_SIZE, activePlayers.size());
+                    for (int j = startIdx; j < endIdx; j++) {
+                        if (visible) {
+                            player.showPlayer(Cl3vent.getInstance(), activePlayers.get(j));
+                        } else {
+                            player.hidePlayer(Cl3vent.getInstance(), activePlayers.get(j));
+                        }
+                    }
+                }, i/BATCH_SIZE);
+            }
+            
+            // Show message to player
+            String message = visible ? 
+                "<grey>Visibilidad de los jugadores fue <green>activada<grey>." :
+                "<grey>Visibilidad de los jugadores fue <red>desactivada<grey>.";
+            player.sendRichMessage(message);
+        }, 1L);
     }
 
 }
