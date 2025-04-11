@@ -122,7 +122,7 @@ public class CakeFever {
     private void start() {
         // More efficient timer implementation
         final Cl3vent plugin = Cl3vent.getInstance();
-        final AtomicInteger time = new AtomicInteger(300);
+        final AtomicInteger time = new AtomicInteger(60);
         
         task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
             int currentTime = time.getAndDecrement();

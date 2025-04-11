@@ -127,7 +127,7 @@ public class BalloonParkour {
         
         // More efficient timer implementation
         final Cl3vent plugin = Cl3vent.getInstance();
-        final AtomicInteger time = new AtomicInteger(30);
+        final AtomicInteger time = new AtomicInteger(60);
         
         task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
             int currentTime = time.getAndDecrement();
@@ -184,6 +184,7 @@ public class BalloonParkour {
     public void reachCheckpoint(Player player, int checkpoint) {
         if (players.containsKey(player.getUniqueId())) {
             players.put(player.getUniqueId(), checkpoint);
+            player.sendRichMessage("<green>Checkpoint alcanzado!");
         }
     }
 

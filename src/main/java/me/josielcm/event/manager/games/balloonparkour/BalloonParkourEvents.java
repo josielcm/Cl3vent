@@ -82,9 +82,6 @@ public class BalloonParkourEvents implements Listener {
                 playersInSafeZone.add(playerId);
                 balloonParkour.getNoElimination().add(playerId);
                 player.sendRichMessage("<green>Estas en la zona segura.");
-            } else if (!isInSafe && wasInSafe) {
-                playersInSafeZone.remove(playerId);
-                player.sendRichMessage("<red>Has salido de la zona segura.");
             }
         }
     }
