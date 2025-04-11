@@ -93,7 +93,7 @@ public class BalloonParkour {
         giveItems();
 
         task = Bukkit.getScheduler().runTaskTimer(Cl3vent.getInstance(), new Runnable() {
-            int time = 300;
+            int time = 30;
 
             @Override
             public void run() {
