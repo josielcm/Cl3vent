@@ -87,6 +87,8 @@ public class BalloonParkour {
                 Cl3vent.getInstance().getEventManager().getPlayers().remove(player);
             }
         });
+
+        start();
     }
 
     public void start() {

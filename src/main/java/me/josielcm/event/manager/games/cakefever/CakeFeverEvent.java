@@ -19,6 +19,8 @@ public class CakeFeverEvent implements Listener {
 
         if (Cl3vent.getInstance().getEventManager().getCakeFever().getCakes().contains(ev.getClickedBlock().getLocation())) {
             Cl3vent.getInstance().getEventManager().getCakeFever().randomPoint(ev.getPlayer());
+        } else {
+            ev.getPlayer().sendRichMessage("<red>Este no es un pastel.");
         }
 
     }
