@@ -1,5 +1,6 @@
 package me.josielcm.event.manager.events;
 
+import org.bukkit.GameMode;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -12,6 +13,11 @@ public class PlayerEvents implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent ev) {
         Cl3vent.getInstance().getEventManager().getPlayers().add(ev.getPlayer().getUniqueId());
+
+        if (Cl3vent.getInstance().getEventManager().getSpawn() != null) {
+            ev.getPlayer().teleport(Cl3vent.getInstance().getEventManager().getSpawn());
+            ev.getPlayer().setGameMode(GameMode.ADVENTURE);
+        }
     }
 
     @EventHandler

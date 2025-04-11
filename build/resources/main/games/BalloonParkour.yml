@@ -1,0 +1,29 @@
+settings:
+  title: "<gold>EL PARKOUR DE LOS GLOBOS</gold>"
+  world: vacio
+  spawn:
+    x: 0
+    y: 90
+    z: 0
+  
+
+checkpoints:
+  0:
+    x: 0
+    y: 90
+    z: 0
+  1:
+    x: 1
+    y: 90
+    z: 1
+
+safe:
+  pos1:
+    x: 3
+    y: 90
+    z: 3
+  pos2: 
+    x: 5
+    y: 98
+    z: 5
+

@@ -4,12 +4,15 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
 import org.bukkit.scheduler.BukkitTask;
 
 import lombok.Getter;
@@ -50,7 +53,14 @@ public class CakeFever {
     @Setter
     private BukkitTask task;
 
+    @Getter
+    @Setter
+    private Listener listener;
+
     public void prepare() {
+        listener = new CakeFeverEvent();
+        Cl3vent.getInstance().getServer().getPluginManager().registerEvents(listener, Cl3vent.getInstance());
+
         removeCakes();
         setCakesBlock();
 
@@ -91,6 +101,36 @@ public class CakeFever {
             task.cancel();
         }
         removeCakes();
+        eliminatePlayers();
+
+        HandlerList.unregisterAll(listener);
+        points.clear();
+    }
+
+    private void eliminatePlayers() {
+        List<UUID> players = get20MenusPoints();
+
+        for (UUID player : players) {
+            Player p = Bukkit.getPlayer(player);
+
+            if (p != null) {
+                Cl3vent.getInstance().getEventManager().eliminatePlayer(player);;
+            }
+        }
+    }
+
+    private List<UUID> get20MenusPoints() {
+        List<UUID> players = new ArrayList<>();
+
+        List<HashMap.Entry<UUID, Integer>> sortedEntries = new ArrayList<>(points.entrySet());
+        sortedEntries.sort(Map.Entry.comparingByValue());
+
+        int limit = Math.min(20, sortedEntries.size());
+        for (int i = 0; i < limit; i++) {
+            players.add(sortedEntries.get(i).getKey());
+        }
+
+        return players;
     }
 
     public void randomPoint(Player player) {

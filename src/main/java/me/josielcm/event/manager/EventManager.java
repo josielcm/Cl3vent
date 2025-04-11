@@ -1,6 +1,8 @@
 package me.josielcm.event.manager;
 
+import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -8,18 +10,22 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
 import lombok.Getter;
 import lombok.Setter;
-import me.josielcm.event.Cl3vent;
 import me.josielcm.event.FileManager;
 import me.josielcm.event.api.formats.Color;
 import me.josielcm.event.api.logs.Log;
 import me.josielcm.event.api.logs.Log.LogLevel;
+import me.josielcm.event.api.regions.Container;
 import me.josielcm.event.manager.games.GameType;
+import me.josielcm.event.manager.games.balloonparkour.BalloonParkour;
 import me.josielcm.event.manager.games.cakefever.CakeFever;
-import me.josielcm.event.manager.games.cakefever.CakeFeverEvent;
+import net.kyori.adventure.title.Title;
+import net.kyori.adventure.title.Title.Times;
 
 public class EventManager {
 
@@ -33,14 +39,33 @@ public class EventManager {
 
     @Getter
     @Setter
+    private BalloonParkour balloonParkour;
+
+    @Getter
+    @Setter
     private GameType actualGame = GameType.NONE;
 
     @Getter
     @Setter
     private boolean inGame = false;
 
-    public void registerEvents() {
-        Cl3vent.getInstance().getServer().getPluginManager().registerEvents(new CakeFeverEvent(), Cl3vent.getInstance());
+    @Getter
+    @Setter
+    private Location spawn;
+
+    public void instanceSpawn() {
+        String worldS = FileManager.getSettings().getString("spawn.world");
+        int xSpawn = FileManager.getSettings().getInt("spawn.x");
+        int ySpawn = FileManager.getSettings().getInt("spawn.y");
+        int zSpawn = FileManager.getSettings().getInt("spawn.z");
+
+        if (Bukkit.getWorld(worldS) == null) {
+            Log.log(LogLevel.ERROR, "World " + worldS + " not found for spawn");
+            return;
+        }
+
+        spawn = new Location(Bukkit.getWorld(worldS), xSpawn, ySpawn, zSpawn);
+        Log.log(LogLevel.INFO, "Spawn loaded at " + spawn.getBlockX() + ", " + spawn.getBlockY() + ", " + spawn.getBlockZ());
     }
 
     public void instanceGames() {
@@ -77,7 +102,51 @@ public class EventManager {
         cakeFever.setWorld(Bukkit.getWorld(worldS));
         cakeFever.setCakes(cakes);
 
+        title = FileManager.getBalloonparkour().getString("settings.title");
+        worldS = FileManager.getBalloonparkour().getString("settings.world");
+        xSpawn = FileManager.getBalloonparkour().getInt("settings.spawn.x");
+        ySpawn = FileManager.getBalloonparkour().getInt("settings.spawn.y");
+        zSpawn = FileManager.getBalloonparkour().getInt("settings.spawn.z");
+        if (Bukkit.getWorld(worldS) == null) {
+            Log.log(LogLevel.ERROR, "World " + worldS + " not found for BalloonParkour");
+            return;
+        }
+
+        spawn = new Location(Bukkit.getWorld(worldS), xSpawn, ySpawn, zSpawn);
+        HashMap<Integer, Location> checkpoints = new HashMap<>();
+        for (String key : FileManager.getBalloonparkour().getConfigurationSection("checkpoints").getKeys(false)) {
+            int xCheckpoint = FileManager.getBalloonparkour().getInt("checkpoints." + key + ".x");
+            int yCheckpoint = FileManager.getBalloonparkour().getInt("checkpoints." + key + ".y");
+            int zCheckpoint = FileManager.getBalloonparkour().getInt("checkpoints." + key + ".z");
+            Location checkpoint = new Location(Bukkit.getWorld(worldS), xCheckpoint, yCheckpoint, zCheckpoint);
+
+            checkpoints.put(Integer.parseInt(key), checkpoint);
+        }
+
+        int xSafeContainerPos1 = FileManager.getBalloonparkour().getInt("safe.pos1.x");
+        int ySafeContainerPos1 = FileManager.getBalloonparkour().getInt("safe.pos1.y");
+        int zSafeContainerPos1 = FileManager.getBalloonparkour().getInt("safe.pos1.x");
+
+        int xSafeContainerPos2 = FileManager.getBalloonparkour().getInt("safe.pos2.x");
+        int ySafeContainerPos2 = FileManager.getBalloonparkour().getInt("safe.pos2.y");
+        int zSafeContainerPos2 = FileManager.getBalloonparkour().getInt("safe.pos2.x");
+
+        Container safeContainer = new Container(
+            new Location(Bukkit.getWorld(worldS), xSafeContainerPos1, ySafeContainerPos1, zSafeContainerPos1),
+            new Location(Bukkit.getWorld(worldS), xSafeContainerPos2, ySafeContainerPos2, zSafeContainerPos2)
+        );
+
+
+
+        balloonParkour = new BalloonParkour();
+        balloonParkour.setTitle(title);
+        balloonParkour.setSpawn(spawn);
+        balloonParkour.setSafeContainer(safeContainer);
+        balloonParkour.setWorld(Bukkit.getWorld(worldS));
+        balloonParkour.setCheckpoints(checkpoints);
+
         Log.log(LogLevel.INFO, "CakeFever loaded with " + cakes.size() + " cakes");
+        Log.log(LogLevel.INFO, "BalloonParkour loaded with " + checkpoints.size() + " checkpoints");
 
     }
 
@@ -94,6 +163,46 @@ public class EventManager {
         
             default:
                 break;
+        }
+
+    }
+
+    public void stopGame() {
+        if (!inGame) {
+            Log.log(LogLevel.INFO, "Game already stopped");
+            return;
+        }
+
+        switch (actualGame) {
+            case CAKEFEVER:
+                cakeFever.stop();
+                break;
+        
+            default:
+                break;
+        }
+
+    }
+
+    public void eliminatePlayer(UUID player) {
+        players.remove(player);
+        Player p = Bukkit.getPlayer(player);
+        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(player);
+
+        sendMessage("<aqua>" + offlinePlayer.getName() + " <red>eliminado!");
+        playSound(Sound.ENTITY_WARDEN_STEP);
+
+        if (p != null) {
+            if (p.hasPermission("cl3vent.twitch")) {
+                p.getInventory().clear();
+                p.getInventory().setArmorContents(null);
+                p.setGameMode(org.bukkit.GameMode.SPECTATOR);
+            } else {
+                p.getInventory().clear();
+                p.getInventory().setArmorContents(null);
+                p.setGameMode(org.bukkit.GameMode.SPECTATOR);
+                p.kick(Color.parse("<gold>Gracias por jugar!"));
+            }
         }
 
     }
@@ -115,6 +224,40 @@ public class EventManager {
 
             if (p != null) {
                 p.sendMessage(Color.parse(message));
+            }
+
+        });
+    }
+
+    public void showTitle(String title, String subtitle, int fadeIn, int stay, int fadeOut) {
+        players.forEach(player -> {
+            Player p = Bukkit.getPlayer(player);
+
+            if (p != null) {
+                Times times = Times.times(
+                    Duration.ofSeconds(fadeIn),
+                    Duration.ofSeconds(stay),
+                    Duration.ofSeconds(fadeOut)
+                );
+
+                Title titleC = Title.title(
+                    Color.parse(title),
+                    Color.parse(subtitle),
+                    times
+                );
+
+                p.showTitle(titleC);
+            }
+
+        });
+    }
+
+    public void playSound(Sound sound) {
+        players.forEach(player -> {
+            Player p = Bukkit.getPlayer(player);
+
+            if (p != null) {
+                p.playSound(p.getLocation(), sound, 1, 1);
             }
 
         });
