@@ -22,6 +22,9 @@ public class EventCommand extends BaseCommand {
         if (gameType.equalsIgnoreCase("cakefever")) {
             Cl3vent.getInstance().getEventManager().startGame(GameType.CAKEFEVER);
             sender.sendMessage(Color.parse("<green>Game started!"));
+        } else if (gameType.equalsIgnoreCase("parkour")) {
+            Cl3vent.getInstance().getEventManager().startGame(GameType.BALLOONPARKOUR);
+            sender.sendMessage(Color.parse("<green>Game started!"));
         } else {
             sender.sendMessage(Color.parse("<red>Invalid game type!"));
         }

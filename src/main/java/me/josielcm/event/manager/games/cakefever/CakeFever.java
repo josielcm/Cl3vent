@@ -64,7 +64,7 @@ public class CakeFever {
         removeCakes();
         setCakesBlock();
 
-        showTitle();
+        // showTitle();
 
         Cl3vent.getInstance().getEventManager().getPlayers().forEach(player -> {
             Player p = Bukkit.getPlayer(player);

@@ -160,7 +160,9 @@ public class EventManager {
             case CAKEFEVER:
                 cakeFever.prepare();
                 break;
-        
+            case BALLOONPARKOUR:
+                balloonParkour.prepare();
+                break;
             default:
                 break;
         }
@@ -177,7 +179,9 @@ public class EventManager {
             case CAKEFEVER:
                 cakeFever.stop();
                 break;
-        
+            case BALLOONPARKOUR:
+                balloonParkour.stop();
+                break;
             default:
                 break;
         }

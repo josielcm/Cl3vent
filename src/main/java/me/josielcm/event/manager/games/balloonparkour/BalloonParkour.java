@@ -68,7 +68,7 @@ public class BalloonParkour {
         listener = new BalloonParkourEvents();
         Bukkit.getPluginManager().registerEvents(listener, Cl3vent.getInstance());
 
-        Cl3vent.getInstance().getEventManager().showTitle(title, "", 1, 3, 1);
+        // Cl3vent.getInstance().getEventManager().showTitle(title, "", 1, 3, 1);
 
         players.clear();
         noElimination.clear();
