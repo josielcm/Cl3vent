@@ -95,6 +95,7 @@ public class CakeFever {
             } else {
                 invalidPlayers.add(playerId);
             }
+
         }
         
         // Teleport players in batches with a slight delay to spread load

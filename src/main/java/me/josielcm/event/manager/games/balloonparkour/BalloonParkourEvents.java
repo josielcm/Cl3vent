@@ -30,7 +30,7 @@ public class BalloonParkourEvents implements Listener {
     private final Map<String, Integer> checkpointCache = new HashMap<>();
     private final Map<UUID, Long> playerCooldowns = new HashMap<>();
 
-    private static final long MOVE_CHECK_INTERVAL = 500; // ms
+    private static final long MOVE_CHECK_INTERVAL = 500;
 
     private BalloonParkour getBalloonParkour() {
         return Cl3vent.getInstance().getEventManager().getBalloonParkour();

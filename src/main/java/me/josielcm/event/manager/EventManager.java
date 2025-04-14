@@ -2,7 +2,6 @@ package me.josielcm.event.manager;
 
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -201,11 +200,9 @@ public class EventManager {
         if (p != null) {
             if (p.hasPermission("cl3vent.twitch")) {
                 p.getInventory().clear();
-                p.getInventory().setArmorContents(null);
                 p.setGameMode(org.bukkit.GameMode.SPECTATOR);
             } else {
                 p.getInventory().clear();
-                p.getInventory().setArmorContents(null);
                 p.setGameMode(org.bukkit.GameMode.SPECTATOR);
                 p.kick(Color.parse("<gold>Gracias por jugar!"));
             }

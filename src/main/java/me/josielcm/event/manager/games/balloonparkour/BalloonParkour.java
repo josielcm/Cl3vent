@@ -146,12 +146,11 @@ public class BalloonParkour {
             }
         }, 0L, 20L);
 
-        // Cada minuto, limpiar caché
         Bukkit.getScheduler().runTaskTimer(Cl3vent.getInstance(), () -> {
             if (listener instanceof BalloonParkourEvents) {
                 ((BalloonParkourEvents) listener).cleanupCache();
             }
-        }, 20*60L, 20*60L); // Ejecutar cada minuto
+        }, 20*60L, 20*60L);
     }
 
     public void stop() {
@@ -201,7 +200,6 @@ public class BalloonParkour {
     }
 
     public void giveItemsOptimized() {
-        // Pre-create all items once
         ItemStack checkpointItem = ItemBuilder.builder()
                 .material(Material.NETHER_STAR)
                 .displayName("<aqua>Regresar al ultimo checkpoint")
@@ -225,7 +223,6 @@ public class BalloonParkour {
         List<Player> validPlayers = new ArrayList<>();
         List<UUID> invalidPlayers = new ArrayList<>();
         
-        // First gather valid players
         for (UUID playerId : eventPlayers) {
             Player p = Bukkit.getPlayer(playerId);
             if (p != null && !p.hasPermission("cl3vent.bypass")) {
@@ -235,7 +232,6 @@ public class BalloonParkour {
             }
         }
         
-        // Process in batches with slight delays
         if (!validPlayers.isEmpty()) {
             final int BATCH_SIZE = 20;
             for (int i = 0; i < validPlayers.size(); i += BATCH_SIZE) {
@@ -253,7 +249,6 @@ public class BalloonParkour {
             }
         }
         
-        // Clean up invalid players
         if (!invalidPlayers.isEmpty()) {
             eventPlayers.removeAll(invalidPlayers);
         }
