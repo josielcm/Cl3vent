@@ -1,9 +1,7 @@
 package me.josielcm.event.api.items;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -49,7 +47,6 @@ public class ItemBuilder {
     private ItemMeta meta;
     private SkullMeta skullMeta;
     private final List<Component> lore = new ArrayList<>();
-    private final Map<Enchantment, Integer> enchantments = new HashMap<>();
 
     /**
      * Creates a new ItemBuilder with the specified material.
@@ -178,7 +175,10 @@ public class ItemBuilder {
      * @return This builder for method chaining
      */
     public ItemBuilder enchant(Enchantment enchantment, int level) {
-        enchantments.put(enchantment, level);
+        if (skullMeta != null)
+            skullMeta.addEnchant(enchantment, level, true);
+        else if (meta != null)
+            meta.addEnchant(enchantment, level, true);
         return this;
     }
 
@@ -343,7 +343,6 @@ public class ItemBuilder {
         else
             item.setItemMeta(meta);
 
-        item.addUnsafeEnchantments(enchantments);
         return item;
     }
 

@@ -9,7 +9,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.World;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
@@ -20,7 +22,9 @@ import org.bukkit.scheduler.BukkitTask;
 import lombok.Getter;
 import lombok.Setter;
 import me.josielcm.event.Cl3vent;
+import me.josielcm.event.api.formats.Color;
 import me.josielcm.event.api.items.ItemBuilder;
+import net.kyori.adventure.title.Title;
 
 public class BalloonShooting {
 
@@ -54,6 +58,10 @@ public class BalloonShooting {
 
     @Getter
     @Setter
+    private Title titleMsg;
+
+    @Getter
+    @Setter
     private BukkitTask task;
 
     @Getter
@@ -69,6 +77,8 @@ public class BalloonShooting {
     public void prepare() {
         points.clear();
 
+        titleMsg = Title.title(Color.parse(title), Color.parse("<gold>¡Dispara a los globos!"));
+
         listener = new BalloonShootingEvents();
 
         Cl3vent.getInstance().getServer().getPluginManager().registerEvents(listener, Cl3vent.getInstance());
@@ -82,6 +92,7 @@ public class BalloonShooting {
             if (p != null) {
                 points.put(playerId, 0);
                 p.teleport(spawn);
+                p.showTitle(titleMsg);
                 p.setGameMode(org.bukkit.GameMode.ADVENTURE);
             } else {
                 playersToRemove.add(playerId);
@@ -94,13 +105,33 @@ public class BalloonShooting {
             plugin.getEventManager().getPlayers().remove(playerId);
         }
 
-        start();
+        final AtomicInteger time = new AtomicInteger(15);
+
+        task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            int currentTime = time.getAndDecrement();
+            if (currentTime <= 0) {
+                start();
+                return;
+            }
+
+            String message = "Iniciando en: " + currentTime;
+            plugin.getEventManager().sendActionBar(message);
+
+        }, 0L, 20L);
     }
 
     public void start() {
+        if (task != null) {
+            task.cancel();
+        }
+        task = null;
+
         final AtomicInteger time = new AtomicInteger(60);
 
         giveItems();
+
+        Cl3vent.getInstance().getEventManager().sendMessage("¡El juego ha comenzado!");
+        Cl3vent.getInstance().getEventManager().playSound(Sound.ENTITY_PLAYER_LEVELUP);
 
         task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
             int currentTime = time.getAndDecrement();
@@ -114,6 +145,11 @@ public class BalloonShooting {
 
             if (currentTime % 30 == 0) {
                 Bukkit.getScheduler().runTaskLater(plugin, this::regenerateBalloons, 1L);
+            }
+
+            if (currentTime == 10) {
+                Cl3vent.getInstance().getEventManager().sendActionBar("¡Quedan 10 segundos!");
+                Cl3vent.getInstance().getEventManager().playSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP);
             }
 
         }, 0L, 20L);
@@ -130,6 +166,9 @@ public class BalloonShooting {
         List<UUID> playersToEliminate = get10MenusPoints();
 
         Cl3vent.getInstance().getEventManager().sendActionBar("¡Juego terminado!");
+        Cl3vent.getInstance().getEventManager().playSound(Sound.ENTITY_WARDEN_HEARTBEAT);
+
+
         Cl3vent.getInstance().getEventManager().sendMessage("Eliminando jugadores...");
 
         Cl3vent.getInstance().getEventManager().sendMessage("Jugadores a eliminar:");
@@ -158,13 +197,18 @@ public class BalloonShooting {
     private void giveItems() {
         ItemStack bow = ItemBuilder.builder()
                 .material(org.bukkit.Material.BOW)
-                .displayName("Bow")
+                .displayName("<gold>Arco")
+                .enchant(Enchantment.INFINITY, 1)
+                .unbreakable(true)
+                .hideUnbreakable()
+                .hideAttributes()
+                .hideEnchants()
                 .build();
 
         ItemStack arrow = ItemBuilder.builder()
                 .material(org.bukkit.Material.ARROW)
-                .displayName("Arrow")
-                .amount(64)
+                .displayName("<grey>Flecha")
+                .amount(1)
                 .build();
 
         eventPlayers.forEach(playerId -> {
@@ -181,6 +225,21 @@ public class BalloonShooting {
         return points.entrySet().stream()
                 .sorted((e1, e2) -> Integer.compare(e1.getValue(), e2.getValue()))
                 .limit(10)
+                .map(entry -> entry.getKey())
+                .toList();
+    }
+
+    public List<UUID> get5MaxPoints() {
+        return points.entrySet().stream()
+                .sorted((e1, e2) -> Integer.compare(e2.getValue(), e1.getValue()))
+                .limit(5)
+                .map(entry -> entry.getKey())
+                .toList();
+    }
+
+    public List<UUID> getAllPoints() {
+        return points.entrySet().stream()
+                .sorted((e1, e2) -> Integer.compare(e2.getValue(), e1.getValue()))
                 .map(entry -> entry.getKey())
                 .toList();
     }

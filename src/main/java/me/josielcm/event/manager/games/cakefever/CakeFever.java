@@ -103,7 +103,6 @@ public class CakeFever {
             }
         }
 
-        // Clean up invalid players
         if (!invalidPlayers.isEmpty()) {
             eventPlayers.removeAll(invalidPlayers);
         }
@@ -186,7 +185,6 @@ public class CakeFever {
     }
 
     public void regenerateCakes() {
-        // Ejecutar en el hilo principal con un pequeño retraso
         Bukkit.getScheduler().runTaskLater(Cl3vent.getInstance(), () -> {
             removeCakes();
             setCakesBlock();
@@ -194,7 +192,6 @@ public class CakeFever {
     }
 
     private void setCakesBlock() {
-        // Procesar en lotes para no sobrecargar el servidor
         final int BATCH_SIZE = 50;
         for (int i = 0; i < cakes.size(); i += BATCH_SIZE) {
             final int startIdx = i;
@@ -208,7 +205,6 @@ public class CakeFever {
     }
 
     private void removeCakes() {
-        // Procesar en lotes para no sobrecargar el servidor
         final int BATCH_SIZE = 50;
         for (int i = 0; i < cakes.size(); i += BATCH_SIZE) {
             final int startIdx = i;
@@ -221,7 +217,6 @@ public class CakeFever {
         }
     }
 
-    // Método para verificar si una ubicación es un cake válido
     public boolean isCakeLocation(Location location) {
         String key = location.getBlockX() + ":" + location.getBlockY() + ":" + location.getBlockZ();
         return cakeLocationCache.containsKey(key);
