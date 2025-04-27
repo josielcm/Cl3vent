@@ -113,9 +113,7 @@ public class BalloonArmorModel {
         armorStand.setVisible(true);
         armorStand.setGravity(false);
         armorStand.setCustomNameVisible(true);
-        armorStand.setMarker(true);
         armorStand.setBasePlate(false);
-        armorStand.setCollidable(false);
         armorStand.customName(Color.parse("<gold>Balloon"));
 
         ItemStack balloon = ItemBuilder.builder()

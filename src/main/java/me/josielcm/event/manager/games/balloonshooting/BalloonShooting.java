@@ -75,6 +75,8 @@ public class BalloonShooting {
 
         regenerateBalloons();
 
+        List<UUID> playersToRemove = new ArrayList<>();
+
         for (UUID playerId : eventPlayers) {
             Player p = Bukkit.getPlayer(playerId);
             if (p != null) {
@@ -82,9 +84,14 @@ public class BalloonShooting {
                 p.teleport(spawn);
                 p.setGameMode(org.bukkit.GameMode.ADVENTURE);
             } else {
-                eventPlayers.remove(playerId);
+                playersToRemove.add(playerId);
             }
+        }
 
+        for (UUID playerId : playersToRemove) {
+            eventPlayers.remove(playerId);
+            points.remove(playerId);
+            plugin.getEventManager().getPlayers().remove(playerId);
         }
 
         start();
