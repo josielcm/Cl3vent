@@ -21,8 +21,9 @@ public class BalloonShootingEvents implements Listener {
         ArmorStand armorStand = (ArmorStand) ev.getHitEntity();
         BalloonShooting balloonShooting = Cl3vent.getInstance().getEventManager().getBalloonShooting();
 
+        ev.getEntity().remove();
+
         if (balloonShooting.isBalloon(armorStand)) {
-            ev.getEntity().remove();
             balloonShooting.addPoint(player.getUniqueId());
             balloonShooting.removeBalloon(armorStand);
             player.sendMessage("§a+1");
