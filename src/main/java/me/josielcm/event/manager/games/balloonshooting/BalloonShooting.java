@@ -12,12 +12,15 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 
 import lombok.Getter;
 import lombok.Setter;
 import me.josielcm.event.Cl3vent;
+import me.josielcm.event.api.items.ItemBuilder;
 
 public class BalloonShooting {
 
@@ -35,11 +38,19 @@ public class BalloonShooting {
 
     @Getter
     @Setter
+    private Location pos1;
+
+    @Getter
+    @Setter
+    private Location pos2;
+
+    @Getter
+    @Setter
     private World world;
 
     @Getter
     @Setter
-    private String title = "Cake Fever";
+    private String title = "Balloon Shooting";
 
     @Getter
     @Setter
@@ -62,50 +73,27 @@ public class BalloonShooting {
 
         Cl3vent.getInstance().getServer().getPluginManager().registerEvents(listener, Cl3vent.getInstance());
 
-        balloons.forEach(e -> {
-            e.removeArmorStand();
-            e.buildArmorStand();
-        });
-
-        List<Player> validPlayers = new ArrayList<>();
-        List<UUID> invalidPlayers = new ArrayList<>();
+        regenerateBalloons();
 
         for (UUID playerId : eventPlayers) {
             Player p = Bukkit.getPlayer(playerId);
             if (p != null) {
                 points.put(playerId, 0);
-                validPlayers.add(p);
+                p.teleport(spawn);
+                p.setGameMode(org.bukkit.GameMode.ADVENTURE);
             } else {
-                invalidPlayers.add(playerId);
+                eventPlayers.remove(playerId);
             }
 
-        }
-        
-        // Teleport players in batches with a slight delay to spread load
-        if (!validPlayers.isEmpty()) {
-            final int BATCH_SIZE = 20;
-            for (int i = 0; i < validPlayers.size(); i += BATCH_SIZE) {
-                final int batchIndex = i;
-                Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                    int end = Math.min(batchIndex + BATCH_SIZE, validPlayers.size());
-                    for (int j = batchIndex; j < end; j++) {
-                        validPlayers.get(j).teleport(spawn);
-                    }
-                }, i/BATCH_SIZE);
-            }
-        }
-        
-        // Clean up invalid players
-        if (!invalidPlayers.isEmpty()) {
-            eventPlayers.removeAll(invalidPlayers);
         }
 
         start();
-
     }
 
     public void start() {
         final AtomicInteger time = new AtomicInteger(60);
+
+        giveItems();
 
         task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
             int currentTime = time.getAndDecrement();
@@ -113,33 +101,112 @@ public class BalloonShooting {
                 stop();
                 return;
             }
-            
-            // Pre-construct action bar message once per tick
+
             String message = "Time: " + currentTime;
             plugin.getEventManager().sendActionBar(message);
-            
-            // Regenerate cakes every 30 seconds
+
             if (currentTime % 30 == 0) {
                 Bukkit.getScheduler().runTaskLater(plugin, this::regenerateBalloons, 1L);
             }
-            
-            // Every 15 seconds, run garbage collection hint
-            if (currentTime % 15 == 0) {
-                Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> System.gc());
-            }
+
         }, 0L, 20L);
 
     }
 
     public void stop() {
-        // asd
+        if (task != null) {
+            task.cancel();
+        }
+
+        List<UUID> playersToEliminate = get10MenusPoints();
+        
+        Cl3vent.getInstance().getEventManager().sendActionBar("Juego terminado!");
+        Cl3vent.getInstance().getEventManager().sendActionBar("Eliminando jugadores...");
+
+        Bukkit.getScheduler().runTask(Cl3vent.getInstance(), () -> {
+            for (UUID player : playersToEliminate) {
+                Player p = Bukkit.getPlayer(player);
+                if (p != null) {
+                    Cl3vent.getInstance().getEventManager().eliminatePlayer(player);
+                }
+            }
+        });
+
+        HandlerList.unregisterAll(listener);
+        points.clear();
+    }
+
+    private void giveItems() {
+        ItemStack bow = ItemBuilder.builder()
+                .material(org.bukkit.Material.BOW)
+                .displayName("Bow")
+                .build();
+
+        ItemStack arrow = ItemBuilder.builder()
+                .material(org.bukkit.Material.ARROW)
+                .displayName("Arrow")
+                .amount(64)
+                .build();
+
+        eventPlayers.forEach(playerId -> {
+            Player player = Bukkit.getPlayer(playerId);
+            if (player != null) {
+                player.getInventory().clear();
+                player.getInventory().setItem(0, bow);
+                player.getInventory().setItem(8, arrow);
+            }
+        });
+    }
+
+    public List<UUID> get10MenusPoints() {
+        return points.entrySet().stream()
+                .sorted((e1, e2) -> Integer.compare(e1.getValue(), e2.getValue()))
+                .limit(10)
+                .map(entry -> entry.getKey())
+                .toList();
+    }
+
+    public void addPoint(UUID player) {
+        points.merge(player, 1, Integer::sum);
     }
 
     private void regenerateBalloons() {
-        balloons.forEach(e -> {
+        List<BalloonArmorModel> balloonsCopy = new ArrayList<>(balloons);
+        balloonsCopy.forEach(e -> {
             e.removeArmorStand();
-            e.buildArmorStand();
+            balloons.remove(e);
         });
+
+        for (int i = 0; i < 20; i++) {
+            BalloonArmorModel balloon = new BalloonArmorModel(pos1, pos2);
+            balloon.buildArmorStand();
+            balloons.add(balloon);
+        }
+    }
+
+    public boolean isBalloon(ArmorStand armorStand) {
+        return balloons.stream().anyMatch(balloon -> balloon.getArmorStand().equals(armorStand));
+    }
+
+    public void removeAllBalloons() {
+        for (BalloonArmorModel balloon : balloons) {
+            balloon.removeArmorStand();
+        }
+        balloons.clear();
+    }
+
+    public void removeBalloon(ArmorStand armorStand) {
+        if (isBalloon(armorStand)) {
+            BalloonArmorModel balloon = balloons.stream()
+                    .filter(b -> b.getArmorStand().equals(armorStand))
+                    .findFirst()
+                    .orElse(null);
+
+            if (balloon != null) {
+                balloon.removeArmorStand();
+                balloons.remove(balloon);
+            }
+        }
     }
 
 }

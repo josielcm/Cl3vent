@@ -23,6 +23,7 @@ import me.josielcm.event.api.logs.Log.LogLevel;
 import me.josielcm.event.api.regions.Container;
 import me.josielcm.event.manager.games.GameType;
 import me.josielcm.event.manager.games.balloonparkour.BalloonParkour;
+import me.josielcm.event.manager.games.balloonshooting.BalloonShooting;
 import me.josielcm.event.manager.games.cakefever.CakeFever;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
@@ -41,6 +42,10 @@ public class EventManager {
     @Getter
     @Setter
     private BalloonParkour balloonParkour;
+
+    @Getter
+    @Setter
+    private BalloonShooting balloonShooting;
 
     @Getter
     @Setter
@@ -144,8 +149,45 @@ public class EventManager {
         balloonParkour.setWorld(Bukkit.getWorld(worldS));
         balloonParkour.setCheckpoints(checkpoints);
 
+        int xSpawnBalloonShooting = FileManager.getBalloonshooting().getInt("settings.spawn.x");
+        int ySpawnBalloonShooting = FileManager.getBalloonshooting().getInt("settings.spawn.y");
+        int zSpawnBalloonShooting = FileManager.getBalloonshooting().getInt("settings.spawn.z");
+        String worldSBalloonShooting = FileManager.getBalloonshooting().getString("settings.world");
+
+        if (Bukkit.getWorld(worldSBalloonShooting) == null) {
+            Log.log(LogLevel.ERROR, "World " + worldSBalloonShooting + " not found for BalloonShooting");
+            return;
+        }
+
+        Location spawnBalloonShooting = new Location(Bukkit.getWorld(worldSBalloonShooting), xSpawnBalloonShooting,
+                ySpawnBalloonShooting, zSpawnBalloonShooting);
+
+        String titleBalloonShooting = FileManager.getBalloonshooting().getString("settings.title");
+
+        int xRPos1 = FileManager.getBalloonshooting().getInt("region.pos1.x");
+        int yRPos1 = FileManager.getBalloonshooting().getInt("region.pos1.y");
+        int zRPos1 = FileManager.getBalloonshooting().getInt("region.pos1.z");
+
+        int xRPos2 = FileManager.getBalloonshooting().getInt("region.pos2.x");
+        int yRPos2 = FileManager.getBalloonshooting().getInt("region.pos2.y");
+        int zRPos2 = FileManager.getBalloonshooting().getInt("region.pos2.z");
+
+        Location pos1 = new Location(Bukkit.getWorld(worldSBalloonShooting), xRPos1, yRPos1, zRPos1);
+        Location pos2 = new Location(Bukkit.getWorld(worldSBalloonShooting), xRPos2, yRPos2, zRPos2);
+
+        balloonShooting = new BalloonShooting();
+        balloonShooting.setTitle(titleBalloonShooting);
+        balloonShooting.setSpawn(spawnBalloonShooting);
+        balloonShooting.setPos1(pos1);
+        balloonShooting.setPos2(pos2);
+        balloonShooting.setWorld(Bukkit.getWorld(worldSBalloonShooting));
+
         Log.log(LogLevel.INFO, "CakeFever loaded with " + cakes.size() + " cakes");
         Log.log(LogLevel.INFO, "BalloonParkour loaded with " + checkpoints.size() + " checkpoints");
+        Log.log(LogLevel.INFO,
+                "BalloonShooting loaded with region: " + pos1.getBlockX() + ", " + pos1.getBlockY() + ", "
+                        + pos1.getBlockZ() + " and " + pos2.getBlockX() + ", " + pos2.getBlockY() + ", "
+                        + pos2.getBlockZ());
 
     }
 
@@ -165,6 +207,9 @@ public class EventManager {
             case BALLOONPARKOUR:
                 balloonParkour.prepare();
                 break;
+            case BALLONSHOOTING:
+                balloonShooting.prepare();
+                break;
             default:
                 break;
         }
@@ -183,6 +228,9 @@ public class EventManager {
             case BALLOONPARKOUR:
                 balloonParkour.stop();
                 break;
+            case BALLONSHOOTING:
+                balloonShooting.stop();
+                break;
             default:
                 break;
         }
@@ -190,12 +238,13 @@ public class EventManager {
     }
 
     public void eliminatePlayer(UUID player) {
-        players.remove(player);
         Player p = Bukkit.getPlayer(player);
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(player);
 
         sendMessage("<aqua>" + offlinePlayer.getName() + " <red>eliminado!");
         playSound(Sound.ENTITY_WARDEN_STEP);
+
+        players.remove(player);
 
         if (p != null) {
             if (p.hasPermission("cl3vent.twitch")) {
@@ -210,11 +259,24 @@ public class EventManager {
 
     }
 
+    public void revivePlayer(UUID player) {
+        players.add(player);
+        Player p = Bukkit.getPlayer(player);
+        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(player);
+
+        sendMessage("<aqua>" + offlinePlayer.getName() + " <green>revivido!");
+        playSound(Sound.ENTITY_WARDEN_STEP);
+
+        if (p != null) {
+            p.setGameMode(org.bukkit.GameMode.ADVENTURE);
+            p.teleport(spawn);
+        }
+
+    }
+
     public void sendActionBar(String message) {
-        // Pre-procesar el mensaje una sola vez
         Component parsedMessage = Color.parse(message);
-        
-        // Usar un ciclo más eficiente
+
         for (UUID playerId : players) {
             Player p = Bukkit.getPlayer(playerId);
             if (p != null) {
@@ -224,9 +286,8 @@ public class EventManager {
     }
 
     public void sendMessage(String message) {
-        // Pre-procesar el mensaje una sola vez
         Component parsedMessage = Color.parse(message);
-        
+
         for (UUID playerId : players) {
             Player p = Bukkit.getPlayer(playerId);
             if (p != null) {
@@ -236,7 +297,6 @@ public class EventManager {
     }
 
     public void showTitle(String title, String subtitle, int fadeIn, int stay, int fadeOut) {
-        // Pre-procesar componentes una sola vez
         Component parsedTitle = Color.parse(title);
         Component parsedSubtitle = Color.parse(subtitle);
         Times times = Times.times(
@@ -244,7 +304,7 @@ public class EventManager {
                 Duration.ofSeconds(stay),
                 Duration.ofSeconds(fadeOut));
         Title titleObj = Title.title(parsedTitle, parsedSubtitle, times);
-        
+
         for (UUID playerId : players) {
             Player p = Bukkit.getPlayer(playerId);
             if (p != null) {

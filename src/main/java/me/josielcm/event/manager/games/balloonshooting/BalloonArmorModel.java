@@ -11,12 +11,13 @@ import org.bukkit.scheduler.BukkitTask;
 
 import lombok.Getter;
 import me.josielcm.event.Cl3vent;
+import me.josielcm.event.api.formats.Color;
 import me.josielcm.event.api.items.ItemBuilder;
 
 public class BalloonArmorModel {
 
     @Getter
-	private ArmorStand armorStand;
+    private ArmorStand armorStand;
 
     @Getter
     private Location location;
@@ -24,20 +25,24 @@ public class BalloonArmorModel {
     @Getter
     private Location pos1;
 
-    @Getter 
+    @Getter
     private Location pos2;
 
-    @Getter 
+    @Getter
     private BukkitTask task;
 
-	public BalloonArmorModel(Location location, Location pos1, Location pos2) {
-        this.location = location;
-	}
+    public BalloonArmorModel(Location pos1, Location pos2) {
+        this.pos1 = pos1;
+        this.pos2 = pos2;
+        this.location = getRandomLocationInside();
+        buildArmorStand();
+        startTask();
+    }
 
     public void startTask() {
         task = Bukkit.getScheduler().runTaskTimer(Cl3vent.getInstance(), new Runnable() {
             private Location targetLocation = getRandomLocationInside();
-            private double step = 0.1; // Movimiento suave (ajustar para mayor o menor suavidad)
+            private double step = 0.5;
             private double progress = 0.0;
 
             @Override
@@ -67,19 +72,25 @@ public class BalloonArmorModel {
     }
 
     private Location getRandomLocationInside() {
-        double x = ThreadLocalRandom.current().nextDouble(pos1.getX(), pos2.getX());
-        double y = ThreadLocalRandom.current().nextDouble(pos1.getY(), pos2.getY());
-        double z = ThreadLocalRandom.current().nextDouble(pos1.getZ(), pos2.getZ());
-
-        if (location.getWorld() == null) {
-            return null;
+        if (pos1 == null || pos2 == null || location == null || location.getWorld() == null) {
+            throw new IllegalStateException("Invalid positions or world is null.");
         }
 
-        if (location.getWorld().getBlockAt((int) x, (int) y, (int) z).getType() != Material.AIR) {
-            return getRandomLocationInside();
+        int maxAttempts = 100;
+        for (int attempt = 0; attempt < maxAttempts; attempt++) {
+            double x = ThreadLocalRandom.current().nextDouble(pos1.getX(), pos2.getX());
+            double y = ThreadLocalRandom.current().nextDouble(pos1.getY(), pos2.getY());
+            double z = ThreadLocalRandom.current().nextDouble(pos1.getZ(), pos2.getZ());
+
+            Location randomLocation = new Location(location.getWorld(), x, y, z);
+
+            if (randomLocation.getWorld().getBlockAt(randomLocation).getType() == Material.AIR) {
+                return randomLocation;
+            }
         }
 
-        return new Location(location.getWorld(), x, y, z);
+        throw new IllegalStateException(
+                "Could not find a valid air block within the specified range after " + maxAttempts + " attempts.");
     }
 
     public void removeArmorStand() {
@@ -88,23 +99,23 @@ public class BalloonArmorModel {
             task = null;
         }
 
-        if (armorStand != null) {
+        if (armorStand != null && !armorStand.isDead()) {
             armorStand.remove();
+            armorStand = null;
         }
-
     }
 
     public void buildArmorStand() {
         removeArmorStand();
 
         armorStand = (ArmorStand) location.getWorld().spawn(location, ArmorStand.class);
-        armorStand.setVisible(false);
+        armorStand.setVisible(true);
         armorStand.setGravity(false);
-        armorStand.setCustomNameVisible(false);
+        armorStand.setCustomNameVisible(true);
         armorStand.setMarker(true);
-        armorStand.setSmall(true);
         armorStand.setBasePlate(false);
-        armorStand.setCollidable(false);
+        armorStand.setCollidable(true);
+        armorStand.customName(Color.parse("<gold>Balloon"));
 
         ItemStack balloon = ItemBuilder.builder()
                 .material(Material.LEATHER_CHESTPLATE)
@@ -117,4 +128,3 @@ public class BalloonArmorModel {
     }
 
 }
-

@@ -1,5 +1,7 @@
 package me.josielcm.event.commands;
 
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 
 import co.aikar.commands.BaseCommand;
@@ -13,7 +15,7 @@ import me.josielcm.event.Cl3vent;
 import me.josielcm.event.api.formats.Color;
 import me.josielcm.event.manager.games.GameType;
 
-@CommandAlias("evento")
+@CommandAlias("event")
 public class EventCommand extends BaseCommand {
 
     @Subcommand("start")
@@ -25,8 +27,29 @@ public class EventCommand extends BaseCommand {
         } else if (gameType.equalsIgnoreCase("parkour")) {
             Cl3vent.getInstance().getEventManager().startGame(GameType.BALLOONPARKOUR);
             sender.sendMessage(Color.parse("<green>Game started!"));
+        } else if (gameType.equalsIgnoreCase("bs")) {
+            Cl3vent.getInstance().getEventManager().startGame(GameType.BALLONSHOOTING);
+            sender.sendMessage(Color.parse("<green>Game started!"));
         } else {
             sender.sendMessage(Color.parse("<red>Invalid game type!"));
+        }
+    }
+
+    @Subcommand("revive")
+    @CommandPermission("cl3vent.command")
+    public void onRevive(CommandSender sender, String playerName) {
+        if (Cl3vent.getInstance().getEventManager().isInGame()) {
+
+            OfflinePlayer player = Bukkit.getOfflinePlayer(playerName);
+
+            if (player != null) {
+                Cl3vent.getInstance().getEventManager().revivePlayer(player.getUniqueId());
+                sender.sendMessage(Color.parse("<green>Player revived!"));
+            } else {
+                sender.sendMessage(Color.parse("<red>Player not found!"));
+            }
+        } else {
+            sender.sendMessage(Color.parse("<red>No game is currently running!"));
         }
     }
 

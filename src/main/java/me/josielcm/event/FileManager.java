@@ -19,17 +19,22 @@ public class FileManager {
     @Getter
     static Config balloonparkour = null;
 
+    @Getter
+    static Config balloonshooting = null;
+
     public static void loadFiles() {
         settings = new Config(plugin, "settings.yml");
         messages = new Config(plugin, "messages.yml");
         cakefever = new Config(plugin, "CakeFever.yml", "games");
         balloonparkour = new Config(plugin, "BalloonParkour.yml", "games");
+        balloonshooting = new Config(plugin, "BalloonShooting.yml", "games");
     }
 
     public static void saveFiles() {
         settings.saveData();
         messages.saveData();
         cakefever.saveData();
+        balloonparkour.saveData();
     }
 
     public static void reload() {
@@ -37,6 +42,7 @@ public class FileManager {
         messages = new Config(plugin, "messages.yml");
         cakefever = new Config(plugin, "CakeFever.yml", "games");
         balloonparkour = new Config(plugin, "BalloonParkour.yml", "games");
+        balloonshooting = new Config(plugin, "BalloonShooting.yml", "games");
     }
 
     public static void debug() {

@@ -84,7 +84,6 @@ public final class Cl3vent extends JavaPlugin {
     private void setupCommands() {
         commandManager = new PaperCommandManager(this);
 
-        // Register all commands at once
         List<BaseCommand> commands = Arrays.asList(
                 new EventCommand(),
                 new Reload());

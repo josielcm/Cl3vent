@@ -2,7 +2,6 @@ package me.josielcm.event.manager.games.cakefever;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -58,35 +57,28 @@ public class CakeFever {
     private final ConcurrentHashMap<String, Boolean> cakeLocationCache = new ConcurrentHashMap<>();
 
     public void prepare() {
-        // Crear el listener
         CakeFeverEvent eventListener = new CakeFeverEvent();
         this.listener = eventListener;
-        
-        // Registrar eventos
+
         Cl3vent.getInstance().getServer().getPluginManager().registerEvents(listener, Cl3vent.getInstance());
 
-        // Limpiar y repoblar la caché
         cakeLocationCache.clear();
         for (Location cake : cakes) {
             String key = cake.getBlockX() + ":" + cake.getBlockY() + ":" + cake.getBlockZ();
             cakeLocationCache.put(key, true);
         }
 
-        // Limpiar puntos anteriores
         points.clear();
-        
-        // Remover y colocar pasteles
+
         removeCakes();
         setCakesBlock();
 
-        // Cache plugin instance to reduce method calls
         final Cl3vent plugin = Cl3vent.getInstance();
         final Set<UUID> eventPlayers = plugin.getEventManager().getPlayers();
-        
-        // Process players in batches
+
         List<Player> validPlayers = new ArrayList<>();
         List<UUID> invalidPlayers = new ArrayList<>();
-        
+
         for (UUID playerId : eventPlayers) {
             Player p = Bukkit.getPlayer(playerId);
             if (p != null) {
@@ -97,8 +89,7 @@ public class CakeFever {
             }
 
         }
-        
-        // Teleport players in batches with a slight delay to spread load
+
         if (!validPlayers.isEmpty()) {
             final int BATCH_SIZE = 20;
             for (int i = 0; i < validPlayers.size(); i += BATCH_SIZE) {
@@ -108,10 +99,10 @@ public class CakeFever {
                     for (int j = batchIndex; j < end; j++) {
                         validPlayers.get(j).teleport(spawn);
                     }
-                }, i/BATCH_SIZE);
+                }, i / BATCH_SIZE);
             }
         }
-        
+
         // Clean up invalid players
         if (!invalidPlayers.isEmpty()) {
             eventPlayers.removeAll(invalidPlayers);
@@ -121,29 +112,21 @@ public class CakeFever {
     }
 
     private void start() {
-        // More efficient timer implementation
         final Cl3vent plugin = Cl3vent.getInstance();
         final AtomicInteger time = new AtomicInteger(60);
-        
+
         task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
             int currentTime = time.getAndDecrement();
             if (currentTime <= 0) {
                 stop();
                 return;
             }
-            
-            // Pre-construct action bar message once per tick
+
             String message = "Time: " + currentTime;
             plugin.getEventManager().sendActionBar(message);
-            
-            // Regenerate cakes every 30 seconds
+
             if (currentTime % 30 == 0) {
                 Bukkit.getScheduler().runTaskLater(plugin, this::regenerateCakes, 1L);
-            }
-            
-            // Every 15 seconds, run garbage collection hint
-            if (currentTime % 15 == 0) {
-                Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> System.gc());
             }
         }, 0L, 20L);
     }
@@ -152,22 +135,18 @@ public class CakeFever {
         if (task != null) {
             task.cancel();
         }
-        
+
         removeCakes();
-        
-        // Eliminar jugadores en un hilo separado para no bloquear el servidor
-        Bukkit.getScheduler().runTaskAsynchronously(Cl3vent.getInstance(), () -> {
-            List<UUID> playersToEliminate = get20MenusPoints();
-            
-            // Volver al hilo principal para eliminar jugadores
-            Bukkit.getScheduler().runTask(Cl3vent.getInstance(), () -> {
-                for (UUID player : playersToEliminate) {
-                    Player p = Bukkit.getPlayer(player);
-                    if (p != null) {
-                        Cl3vent.getInstance().getEventManager().eliminatePlayer(player);
-                    }
+
+        List<UUID> playersToEliminate = get20MenusPoints();
+
+        Bukkit.getScheduler().runTask(Cl3vent.getInstance(), () -> {
+            for (UUID player : playersToEliminate) {
+                Player p = Bukkit.getPlayer(player);
+                if (p != null) {
+                    Cl3vent.getInstance().getEventManager().eliminatePlayer(player);
                 }
-            });
+            }
         });
 
         HandlerList.unregisterAll(listener);
@@ -176,33 +155,25 @@ public class CakeFever {
     }
 
     private List<UUID> get20MenusPoints() {
-        List<UUID> players = new ArrayList<>();
-
-        // Usar CopyOnWriteArrayList para evitar excepciones de concurrencia
-        List<Map.Entry<UUID, Integer>> sortedEntries = new ArrayList<>(points.entrySet());
-        
-        // Ordenar por puntos (menor a mayor)
-        sortedEntries.sort(Map.Entry.comparingByValue());
-
-        int limit = Math.min(20, sortedEntries.size());
-        for (int i = 0; i < limit; i++) {
-            players.add(sortedEntries.get(i).getKey());
-        }
-
-        return players;
+        return points.entrySet().stream()
+                .sorted((e1, e2) -> Integer.compare(e1.getValue(), e2.getValue()))
+                .limit(20)
+                .map(entry -> entry.getKey())
+                .toList();
     }
 
     public void randomPoint(Player player) {
         boolean isCake = RandomUtils.randomBool();
         UUID playerId = player.getUniqueId();
-        
+
         // Usar computeIfPresent para operaciones atómicas
         if (isCake) {
             points.compute(playerId, (k, v) -> v == null ? 1 : v + 1);
             player.sendRichMessage("<aqua>+1</aqua>");
         } else {
             points.compute(playerId, (k, v) -> {
-                if (v == null) return 0;
+                if (v == null)
+                    return 0;
                 int reducedPoints = RandomUtils.randomInt(1, 3);
                 return Math.max(0, v - reducedPoints);
             });
@@ -230,7 +201,7 @@ public class CakeFever {
                 for (int j = startIdx; j < endIdx; j++) {
                     cakes.get(j).getBlock().setType(org.bukkit.Material.CAKE);
                 }
-            }, i/BATCH_SIZE);
+            }, i / BATCH_SIZE);
         }
     }
 
@@ -244,7 +215,7 @@ public class CakeFever {
                 for (int j = startIdx; j < endIdx; j++) {
                     cakes.get(j).getBlock().setType(org.bukkit.Material.AIR);
                 }
-            }, i/BATCH_SIZE);
+            }, i / BATCH_SIZE);
         }
     }
 

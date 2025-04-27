@@ -1,0 +1,17 @@
+settings:
+  title: "<gold>TIRO AL GLOBO</gold>"
+  world: vacio
+  spawn:
+    x: 0
+    y: 90
+    z: 0
+
+region:
+  pos1:
+    x: 0
+    y: 92
+    z: 0
+  pos2: 
+    x: 5
+    y: 98
+    z: 5

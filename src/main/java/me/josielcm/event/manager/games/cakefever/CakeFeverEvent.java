@@ -17,11 +17,10 @@ import java.util.UUID;
 public class CakeFeverEvent implements Listener {
 
     private final Map<UUID, Long> interactCooldowns = new HashMap<>();
-    private static final long INTERACT_COOLDOWN = 200; // ms
+    private static final long INTERACT_COOLDOWN = 200;
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onCake(PlayerInteractEvent ev) {
-        // Verificaciones rápidas primero
         if (ev.getClickedBlock() == null || ev.getClickedBlock().getType() != Material.CAKE)
             return;
 
@@ -32,7 +31,6 @@ public class CakeFeverEvent implements Listener {
         Player player = ev.getPlayer();
         UUID playerId = player.getUniqueId();
 
-        // Aplicar cooldown para evitar spam de clics
         long now = System.currentTimeMillis();
         if (interactCooldowns.containsKey(playerId) && 
             now - interactCooldowns.get(playerId) < INTERACT_COOLDOWN) {
@@ -41,10 +39,10 @@ public class CakeFeverEvent implements Listener {
         }
         interactCooldowns.put(playerId, now);
 
-        // Usar método optimizado para verificar si es un cake válido
         CakeFever cakeFever = Cl3vent.getInstance().getEventManager().getCakeFever();
         if (cakeFever.isCakeLocation(ev.getClickedBlock().getLocation())) {
             cakeFever.randomPoint(player);
+            ev.getClickedBlock().setType(Material.AIR);
         } else {
             player.sendRichMessage("<red>Este no es un pastel.");
         }
