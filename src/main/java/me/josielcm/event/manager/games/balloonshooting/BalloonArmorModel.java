@@ -41,7 +41,7 @@ public class BalloonArmorModel {
     public void startTask() {
         task = Bukkit.getScheduler().runTaskTimer(Cl3vent.getInstance(), new Runnable() {
             private Location targetLocation = getRandomLocationInside();
-            private double step = 0.05;
+            private double step = 0.02;
             private double progress = 0.0;
 
             @Override

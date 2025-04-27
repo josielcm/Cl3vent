@@ -1,12 +1,10 @@
 package me.josielcm.event.manager.games.balloonparkour;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -27,10 +25,6 @@ import me.josielcm.event.manager.games.GameType;
 public class BalloonParkourEvents implements Listener {
 
     private final Set<UUID> playersInSafeZone = new HashSet<>();
-    private final Map<String, Integer> checkpointCache = new HashMap<>();
-    private final Map<UUID, Long> playerCooldowns = new HashMap<>();
-
-    private static final long MOVE_CHECK_INTERVAL = 500;
 
     private BalloonParkour getBalloonParkour() {
         return Cl3vent.getInstance().getEventManager().getBalloonParkour();
@@ -44,44 +38,48 @@ public class BalloonParkourEvents implements Listener {
 
         Player player = ev.getPlayer();
         UUID playerId = player.getUniqueId();
-
         BalloonParkour balloonParkour = getBalloonParkour();
 
         if (player.hasPermission("cl3vent.bypass") || player.getWorld() != balloonParkour.getWorld())
             return;
 
-        // Verificar si realmente se movió de bloque
-        if (!hasPlayerMoved(ev.getFrom(), ev.getTo()))
+        // Solo procesar si el jugador realmente se movió de bloque
+        Location to = ev.getTo();
+        Location from = ev.getFrom();
+        if (to.getBlockX() == from.getBlockX() && 
+            to.getBlockY() == from.getBlockY() && 
+            to.getBlockZ() == from.getBlockZ())
             return;
 
-        // Aplicar cooldown para reducir verificaciones
-        long now = System.currentTimeMillis();
-        if (playerCooldowns.containsKey(playerId) && 
-            now - playerCooldowns.get(playerId) < MOVE_CHECK_INTERVAL) {
-            return;
-        }
-        playerCooldowns.put(playerId, now);
+        Location loc = to;
 
-        // Verificar checkpoints y zona segura con menor frecuencia
-        Location loc = player.getLocation();
-
-        // Verificar solo si está cerca de un checkpoint
-        if (isInCheckpointArea(loc)) {
-            int checkpoint = getCheckpoint(loc);
-            if (checkpoint != -1 && getPlayerCheckpoint(player) < checkpoint) {
-                balloonParkour.reachCheckpoint(player, checkpoint);
-            }
-        }
-
-        // Optimizar verificación de zona segura
-        if (balloonParkour.getSafeContainer() != null) {
-            boolean isInSafe = balloonParkour.getSafeContainer().isInside(loc);
-            boolean wasInSafe = playersInSafeZone.contains(playerId);
-
-            if (isInSafe && !wasInSafe) {
+        // Verificar zona final primero (prioridad más alta)
+        if (balloonParkour.getSafeContainer() != null && 
+            balloonParkour.getSafeContainer().isInside(loc)) {
+            if (!playersInSafeZone.contains(playerId)) {
                 playersInSafeZone.add(playerId);
                 balloonParkour.getNoElimination().add(playerId);
-                player.sendRichMessage("<green>Estas en la zona segura.");
+                player.sendRichMessage("<green>¡Has llegado a la zona final! ¡Estás a salvo!");
+                
+                // Verificar si es el último checkpoint antes de la zona final
+                int lastCheckpoint = balloonParkour.getCheckpoints().size() - 1;
+                int playerCheckpoint = getPlayerCheckpoint(player);
+                if (playerCheckpoint == lastCheckpoint) {
+                    player.sendRichMessage("<gold>¡Felicidades! ¡Has completado el parkour!");
+                }
+            }
+            return;
+        }
+
+        // Optimización: Solo verificar checkpoints si el jugador está cerca de uno
+        if (isInCheckpointArea(loc)) {
+            int checkpoint = getCheckpoint(loc);
+            if (checkpoint != -1) {
+                int currentCheckpoint = getPlayerCheckpoint(player);
+                // Solo actualizar si es el siguiente checkpoint
+                if (checkpoint == currentCheckpoint + 1) {
+                    balloonParkour.reachCheckpoint(player, checkpoint);
+                }
             }
         }
     }
@@ -145,57 +143,37 @@ public class BalloonParkourEvents implements Listener {
 
     }
 
-    private boolean hasPlayerMoved(Location from, Location to) {
-        return from.getBlockX() != to.getBlockX() || from.getBlockY() != to.getBlockY()
-                || from.getBlockZ() != to.getBlockZ();
+    // Optimizar la detección de área de checkpoint
+    private boolean isInCheckpointArea(Location location) {
+        int x = location.getBlockX();
+        int y = location.getBlockY();
+        int z = location.getBlockZ();
+        
+        for (Location checkpoint : getBalloonParkour().getCheckpoints().values()) {
+            if (Math.abs(checkpoint.getBlockX() - x) <= 1 &&
+                Math.abs(checkpoint.getBlockY() - y) <= 1 &&
+                Math.abs(checkpoint.getBlockZ() - z) <= 1) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    // Optimizar la detección de checkpoints con cache 
+    // Optimizar la obtención del checkpoint exacto
     public int getCheckpoint(Location location) {
-        try {
-            String key = location.getBlockX() + ":" + location.getBlockY() + ":" + location.getBlockZ();
-            
-            // Verificar si ya tenemos el checkpoint en cache
-            if (checkpointCache.containsKey(key)) {
-                return checkpointCache.get(key);
+        int x = location.getBlockX();
+        int y = location.getBlockY();
+        int z = location.getBlockZ();
+        
+        for (Map.Entry<Integer, Location> entry : getBalloonParkour().getCheckpoints().entrySet()) {
+            Location checkpoint = entry.getValue();
+            if (Math.abs(checkpoint.getBlockX() - x) <= 1 &&
+                Math.abs(checkpoint.getBlockY() - y) <= 1 &&
+                Math.abs(checkpoint.getBlockZ() - z) <= 1) {
+                return entry.getKey();
             }
-            
-            // Buscar el checkpoint que tenga la menor distancia dentro del rango aceptable
-            int closestCheckpoint = -1;
-            double minDistance = Double.MAX_VALUE;
-            
-            for (Map.Entry<Integer, Location> entry : getBalloonParkour().getCheckpoints().entrySet()) {
-                Location checkpoint = entry.getValue();
-                if (Math.abs(checkpoint.getBlockX() - location.getBlockX()) <= 1 &&
-                    Math.abs(checkpoint.getBlockY() - location.getBlockY()) <= 1 &&
-                    Math.abs(checkpoint.getBlockZ() - location.getBlockZ()) <= 1) {
-                        
-                    double distance = Math.abs(checkpoint.getX() - location.getX()) +
-                                     Math.abs(checkpoint.getY() - location.getY()) +
-                                     Math.abs(checkpoint.getZ() - location.getZ());
-                                     
-                    if (distance < minDistance) {
-                        minDistance = distance;
-                        closestCheckpoint = entry.getKey();
-                    }
-                }
-            }
-            
-            // Guardar en cache el resultado
-            checkpointCache.put(key, closestCheckpoint);
-            return closestCheckpoint;
-        } catch (Exception e) {
-            // Log error pero no interrumpir el juego
-            Bukkit.getLogger().warning("Error al verificar checkpoint: " + e.getMessage());
-            return -1;
         }
-    }
-
-    public void cleanupCache() {
-        // Si el caché crece demasiado, limpiarlo
-        if (checkpointCache.size() > 10000) {
-            initCheckpointCache(); // Reiniciar con valores conocidos
-        }
+        return -1;
     }
 
     public Location getCheckpointLocation(int checkpoint) {
@@ -208,52 +186,6 @@ public class BalloonParkourEvents implements Listener {
             return getBalloonParkour().getPlayers().get(player.getUniqueId());
         }
         return -1;
-    }
-
-    // Método auxiliar para pre-verificar si está en un área potencial de checkpoint
-    private boolean isInCheckpointArea(Location location) {
-        // Esta verificación es más rápida que iterar por todos los checkpoints
-        for (Location checkpoint : getBalloonParkour().getCheckpoints().values()) {
-            if (checkpoint.getWorld() == location.getWorld() &&
-                Math.abs(checkpoint.getBlockX() - location.getBlockX()) <= 2 &&
-                Math.abs(checkpoint.getBlockY() - location.getBlockY()) <= 2 &&
-                Math.abs(checkpoint.getBlockZ() - location.getBlockZ()) <= 2) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    // Añade este método para inicializar el caché de checkpoints al inicio
-    public void initCheckpointCache() {
-        checkpointCache.clear();
-        
-        // Pre-calcular algunas ubicaciones que son probablemente checkpoints
-        BalloonParkour balloonParkour = getBalloonParkour();
-        for (Map.Entry<Integer, Location> entry : balloonParkour.getCheckpoints().entrySet()) {
-            Location checkpoint = entry.getValue();
-            
-            // Almacenar el bloque exacto
-            String exactKey = checkpoint.getBlockX() + ":" + checkpoint.getBlockY() + ":" + checkpoint.getBlockZ();
-            checkpointCache.put(exactKey, entry.getKey());
-            
-            // También almacenar bloques adyacentes que suelen disparar la detección
-            for (int dx = -1; dx <= 1; dx++) {
-                for (int dy = -1; dy <= 1; dy++) {
-                    for (int dz = -1; dz <= 1; dz++) {
-                        if (dx == 0 && dy == 0 && dz == 0) continue; // Saltar el bloque exacto
-                        
-                        String nearbyKey = (checkpoint.getBlockX() + dx) + ":" + 
-                                          (checkpoint.getBlockY() + dy) + ":" + 
-                                          (checkpoint.getBlockZ() + dz);
-                        // Solo almacenar si no existe ya una entrada para esta ubicación
-                        if (!checkpointCache.containsKey(nearbyKey)) {
-                            checkpointCache.put(nearbyKey, entry.getKey());
-                        }
-                    }
-                }
-            }
-        }
     }
 
 }

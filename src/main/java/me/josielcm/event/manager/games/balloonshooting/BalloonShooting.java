@@ -130,7 +130,15 @@ public class BalloonShooting {
         List<UUID> playersToEliminate = get10MenusPoints();
 
         Cl3vent.getInstance().getEventManager().sendActionBar("¡Juego terminado!");
-        Cl3vent.getInstance().getEventManager().sendActionBar("Eliminando jugadores...");
+        Cl3vent.getInstance().getEventManager().sendMessage("Eliminando jugadores...");
+
+        Cl3vent.getInstance().getEventManager().sendMessage("Jugadores a eliminar:");
+        playersToEliminate.forEach(playerId -> {
+            Player player = Bukkit.getPlayer(playerId);
+            if (player != null) {
+                Cl3vent.getInstance().getEventManager().sendMessage("- " + player.getName() + " | " + points.get(playerId) + " puntos");
+            }
+        });
 
         Bukkit.getScheduler().runTask(Cl3vent.getInstance(), () -> {
             for (UUID player : playersToEliminate) {
