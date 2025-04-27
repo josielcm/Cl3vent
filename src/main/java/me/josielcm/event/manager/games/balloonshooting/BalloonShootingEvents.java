@@ -15,6 +15,12 @@ public class BalloonShootingEvents implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
     public void onBalloonShoot(ProjectileHitEvent ev) {
         if (!(ev.getEntity() instanceof Arrow)) return;
+
+        if (ev.getHitEntity() == null) {
+            ev.getEntity().remove();
+            return;
+        }
+        
         if (!(ev.getHitEntity() instanceof ArmorStand) || !(ev.getEntity().getShooter() instanceof Player)) return;
 
         Player player = (Player) ev.getEntity().getShooter();
