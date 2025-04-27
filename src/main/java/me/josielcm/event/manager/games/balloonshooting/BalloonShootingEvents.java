@@ -25,7 +25,7 @@ public class BalloonShootingEvents implements Listener {
             ev.getEntity().remove();
             balloonShooting.addPoint(player.getUniqueId());
             balloonShooting.removeBalloon(armorStand);
-            player.sendMessage("§a¡Has disparado un globo! +1 punto");
+            player.sendMessage("§a+1");
         }
     }
 

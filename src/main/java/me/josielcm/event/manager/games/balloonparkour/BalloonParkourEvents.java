@@ -39,7 +39,7 @@ public class BalloonParkourEvents implements Listener {
 
         Bukkit.getLogger().info("§eProcesando movimiento para: " + player.getName());
 
-        if (player.getWorld() != balloonParkour.getWorld()) // player.hasPermission("cl3vent.bypass") || 
+        if (player.getWorld() != balloonParkour.getWorld()) // player.hasPermission("cl3vent.bypass") ||
             return;
 
         Location to = ev.getTo();
@@ -63,6 +63,8 @@ public class BalloonParkourEvents implements Listener {
                 if (playerCheckpoint == lastCheckpoint) {
                     player.sendRichMessage("<gold>¡Felicidades! ¡Has completado el parkour!");
                 }
+
+                player.getInventory().clear();
             }
             return;
         }
@@ -84,7 +86,8 @@ public class BalloonParkourEvents implements Listener {
         Player player = ev.getPlayer();
 
         // Corregir la condición de acción
-        if (ev.getAction() != Action.RIGHT_CLICK_BLOCK && ev.getAction() != Action.RIGHT_CLICK_AIR) // player.hasPermission("cl3vent.bypass") || 
+        if (ev.getAction() != Action.RIGHT_CLICK_BLOCK && ev.getAction() != Action.RIGHT_CLICK_AIR) // player.hasPermission("cl3vent.bypass")
+                                                                                                    // ||
             return;
         if (ev.getItem() == null || !ev.getItem().hasItemMeta())
             return;
@@ -96,22 +99,26 @@ public class BalloonParkourEvents implements Listener {
 
         switch (data.get(Key.getParkourItemsKey(), PersistentDataType.STRING)) {
             case "checkpoint":
-                int checkpoint = getPlayerCheckpoint(player);
-                if (checkpoint == -1) {
-                    player.teleport(getBalloonParkour().getSpawn());
-                    return;
+                if (!playersInSafeZone.contains(player.getUniqueId())) {
+                    int checkpoint = getPlayerCheckpoint(player);
+                    if (checkpoint == -1) {
+                        player.teleport(getBalloonParkour().getSpawn());
+                        return;
+                    }
+
+                    Location checkLocation = getCheckpointLocation(checkpoint);
+                    if (checkLocation == null) {
+                        player.teleport(getBalloonParkour().getSpawn());
+                        return;
+                    }
+
+                    player.teleport(checkLocation);
+                    player.sendRichMessage("<grey>Regresando al checkpoint <green>" + checkpoint + "<grey>.");
+
+                    break;
+                } else {
+                    player.sendRichMessage("<grey>Ya has completado el parkour.");
                 }
-
-                Location checkLocation = getCheckpointLocation(checkpoint);
-                if (checkLocation == null) {
-                    player.teleport(getBalloonParkour().getSpawn());
-                    return;
-                }
-
-                player.teleport(checkLocation);
-                player.sendRichMessage("<grey>Regresando al checkpoint <green>" + checkpoint + "<grey>.");
-
-                break;
             case "toggle-visibility":
                 boolean visible = getBalloonParkour().getVisibility()
                         .get(player.getUniqueId());
