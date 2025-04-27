@@ -134,6 +134,8 @@ public class BalloonShooting {
 
         HandlerList.unregisterAll(listener);
         points.clear();
+
+        Cl3vent.getInstance().getEventManager().stop();
     }
 
     private void giveItems() {

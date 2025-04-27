@@ -80,42 +80,19 @@ public class BalloonParkour {
         noElimination.clear();
         visibility.clear();
         
-        // Cache plugin instance to reduce method calls
         final Cl3vent plugin = Cl3vent.getInstance();
         final Set<UUID> eventPlayers = plugin.getEventManager().getPlayers();
-        
-        // Process players in batches
-        List<Player> validPlayers = new ArrayList<>();
-        List<UUID> invalidPlayers = new ArrayList<>();
         
         for (UUID playerId : eventPlayers) {
             Player p = Bukkit.getPlayer(playerId);
             if (p != null) {
-                players.put(playerId, -1);
+                players.put(playerId, 0);
                 visibility.put(playerId, true);
-                validPlayers.add(p);
+                p.getInventory().clear();
+                p.teleport(spawn);
             } else {
-                invalidPlayers.add(playerId);
+                players.remove(playerId);
             }
-        }
-        
-        // Teleport players in batches with a slight delay to spread load
-        if (!validPlayers.isEmpty()) {
-            final int BATCH_SIZE = 20;
-            for (int i = 0; i < validPlayers.size(); i += BATCH_SIZE) {
-                final int batchIndex = i;
-                Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                    int end = Math.min(batchIndex + BATCH_SIZE, validPlayers.size());
-                    for (int j = batchIndex; j < end; j++) {
-                        validPlayers.get(j).teleport(spawn);
-                    }
-                }, i/BATCH_SIZE);
-            }
-        }
-        
-        // Clean up invalid players
-        if (!invalidPlayers.isEmpty()) {
-            eventPlayers.removeAll(invalidPlayers);
         }
         
         start();
@@ -136,14 +113,9 @@ public class BalloonParkour {
                 return;
             }
             
-            // Pre-construct action bar message once per tick
             String message = "Time: " + currentTime;
             plugin.getEventManager().sendActionBar(message);
             
-            // Every 5 seconds, run garbage collection hint
-            if (currentTime % 5 == 0) {
-                Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> System.gc());
-            }
         }, 0L, 20L);
 
         Bukkit.getScheduler().runTaskTimer(Cl3vent.getInstance(), () -> {

@@ -41,9 +41,9 @@ public class BalloonArmorModel {
 
     public void startTask() {
         task = Bukkit.getScheduler().runTaskTimer(Cl3vent.getInstance(), new Runnable() {
-            private Location targetLocation = getRandomLocationInside();
-            private double step = 0.5;
-            private double progress = 0.0;
+            private Location targetLocation = getRandomLocationInside(); // Nueva ubicación aleatoria
+            private double step = 0.05; // Paso más pequeño para un movimiento más suave
+            private double progress = 0.0; // Progreso del movimiento
 
             @Override
             public void run() {
@@ -58,6 +58,7 @@ public class BalloonArmorModel {
                 }
 
                 Location currentLocation = armorStand.getLocation();
+
                 double newX = currentLocation.getX() + (targetLocation.getX() - currentLocation.getX()) * step;
                 double newY = currentLocation.getY() + (targetLocation.getY() - currentLocation.getY()) * step;
                 double newZ = currentLocation.getZ() + (targetLocation.getZ() - currentLocation.getZ()) * step;
@@ -66,13 +67,14 @@ public class BalloonArmorModel {
                 newY += randomYOffset;
 
                 armorStand.teleport(new Location(currentLocation.getWorld(), newX, newY, newZ));
+
                 progress += step;
             }
         }, 0, 1);
     }
 
     private Location getRandomLocationInside() {
-        if (pos1 == null || pos2 == null || location == null || location.getWorld() == null) {
+        if (pos1 == null || pos2 == null) {
             throw new IllegalStateException("Invalid positions or world is null.");
         }
 
@@ -82,7 +84,7 @@ public class BalloonArmorModel {
             double y = ThreadLocalRandom.current().nextDouble(pos1.getY(), pos2.getY());
             double z = ThreadLocalRandom.current().nextDouble(pos1.getZ(), pos2.getZ());
 
-            Location randomLocation = new Location(location.getWorld(), x, y, z);
+            Location randomLocation = new Location(pos1.getWorld(), x, y, z);
 
             if (randomLocation.getWorld().getBlockAt(randomLocation).getType() == Material.AIR) {
                 return randomLocation;

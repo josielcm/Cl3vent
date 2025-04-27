@@ -152,6 +152,8 @@ public class CakeFever {
         HandlerList.unregisterAll(listener);
         points.clear();
         cakeLocationCache.clear();
+
+        Cl3vent.getInstance().getEventManager().stop();
     }
 
     private List<UUID> get20MenusPoints() {

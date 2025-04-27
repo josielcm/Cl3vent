@@ -237,6 +237,11 @@ public class EventManager {
 
     }
 
+    public void stop() {
+        inGame = false;
+        actualGame = GameType.NONE;
+    }
+
     public void eliminatePlayer(UUID player) {
         Player p = Bukkit.getPlayer(player);
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(player);
