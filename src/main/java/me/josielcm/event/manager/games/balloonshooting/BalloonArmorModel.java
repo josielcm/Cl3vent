@@ -36,25 +36,19 @@ public class BalloonArmorModel {
         this.pos2 = pos2;
         this.location = getRandomLocationInside();
         buildArmorStand();
-        startTask();
     }
 
     public void startTask() {
         task = Bukkit.getScheduler().runTaskTimer(Cl3vent.getInstance(), new Runnable() {
-            private Location targetLocation = getRandomLocationInside(); // Nueva ubicación aleatoria
-            private double step = 0.05; // Paso más pequeño para un movimiento más suave
-            private double progress = 0.0; // Progreso del movimiento
+            private Location targetLocation = getRandomLocationInside();
+            private double step = 0.05;
+            private double progress = 0.0;
 
             @Override
             public void run() {
                 if (armorStand == null || armorStand.isDead()) {
                     removeArmorStand();
                     return;
-                }
-
-                if (progress >= 1.0) {
-                    targetLocation = getRandomLocationInside();
-                    progress = 0.0;
                 }
 
                 Location currentLocation = armorStand.getLocation();
@@ -69,8 +63,13 @@ public class BalloonArmorModel {
                 armorStand.teleport(new Location(currentLocation.getWorld(), newX, newY, newZ));
 
                 progress += step;
+
+                if (progress >= 1.0) {
+                    targetLocation = getRandomLocationInside();
+                    progress = 0.0;
+                }
             }
-        }, 0, 1);
+        }, 0L, 1L);
     }
 
     private Location getRandomLocationInside() {
@@ -116,7 +115,7 @@ public class BalloonArmorModel {
         armorStand.setCustomNameVisible(true);
         armorStand.setMarker(true);
         armorStand.setBasePlate(false);
-        armorStand.setCollidable(true);
+        armorStand.setCollidable(false);
         armorStand.customName(Color.parse("<gold>Balloon"));
 
         ItemStack balloon = ItemBuilder.builder()
@@ -127,6 +126,7 @@ public class BalloonArmorModel {
 
         armorStand.getEquipment().setHelmet(balloon);
 
+        startTask();
     }
 
 }

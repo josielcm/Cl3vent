@@ -118,9 +118,11 @@ public class BalloonShooting {
             task.cancel();
         }
 
+        removeAllBalloons();
+
         List<UUID> playersToEliminate = get10MenusPoints();
-        
-        Cl3vent.getInstance().getEventManager().sendActionBar("Juego terminado!");
+
+        Cl3vent.getInstance().getEventManager().sendActionBar("¡Juego terminado!");
         Cl3vent.getInstance().getEventManager().sendActionBar("Eliminando jugadores...");
 
         Bukkit.getScheduler().runTask(Cl3vent.getInstance(), () -> {
@@ -173,42 +175,27 @@ public class BalloonShooting {
     }
 
     private void regenerateBalloons() {
-        List<BalloonArmorModel> balloonsCopy = new ArrayList<>(balloons);
-        balloonsCopy.forEach(e -> {
-            e.removeArmorStand();
-            balloons.remove(e);
-        });
+        removeAllBalloons();
 
         for (int i = 0; i < 20; i++) {
             BalloonArmorModel balloon = new BalloonArmorModel(pos1, pos2);
-            balloon.buildArmorStand();
             balloons.add(balloon);
         }
     }
 
-    public boolean isBalloon(ArmorStand armorStand) {
-        return balloons.stream().anyMatch(balloon -> balloon.getArmorStand().equals(armorStand));
-    }
-
     public void removeAllBalloons() {
-        for (BalloonArmorModel balloon : balloons) {
-            balloon.removeArmorStand();
-        }
+        balloons.forEach(BalloonArmorModel::removeArmorStand);
         balloons.clear();
     }
 
     public void removeBalloon(ArmorStand armorStand) {
-        if (isBalloon(armorStand)) {
-            BalloonArmorModel balloon = balloons.stream()
-                    .filter(b -> b.getArmorStand().equals(armorStand))
-                    .findFirst()
-                    .orElse(null);
+        balloons.removeIf(balloon -> balloon.getArmorStand().equals(armorStand));
+        armorStand.remove();
+    }
 
-            if (balloon != null) {
-                balloon.removeArmorStand();
-                balloons.remove(balloon);
-            }
-        }
+    public boolean isBalloon(ArmorStand armorStand) {
+        return balloons.stream()
+                .anyMatch(balloon -> balloon.getArmorStand().equals(armorStand));
     }
 
 }

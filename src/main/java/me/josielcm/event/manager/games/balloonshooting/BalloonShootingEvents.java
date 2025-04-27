@@ -9,7 +9,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.ProjectileHitEvent;
 
 import me.josielcm.event.Cl3vent;
-import me.josielcm.event.manager.games.GameType;
 
 public class BalloonShootingEvents implements Listener {
 
@@ -17,24 +16,21 @@ public class BalloonShootingEvents implements Listener {
     public void onBalloonShoot(ProjectileHitEvent ev) {
         if (!(ev.getEntity() instanceof Arrow))
             return;
-        if (!Cl3vent.getInstance().getEventManager().isInGame() ||
-                Cl3vent.getInstance().getEventManager().getActualGame() != GameType.BALLONSHOOTING)
-            return;
-        if (ev.getHitEntity() == null || !(ev.getHitEntity() instanceof ArmorStand)
-                || !(ev.getEntity().getShooter() instanceof Player p))
+
+        if (!(ev.getHitEntity() instanceof ArmorStand) ||
+                !(ev.getEntity().getShooter() instanceof Player player))
             return;
 
-        BalloonShooting balloonShooting = Cl3vent.getInstance().getEventManager().getBalloonShooting();
         ArmorStand armorStand = (ArmorStand) ev.getHitEntity();
+        BalloonShooting balloonShooting = Cl3vent.getInstance().getEventManager().getBalloonShooting();
 
         if (balloonShooting.isBalloon(armorStand)) {
-            balloonShooting.addPoint(p.getUniqueId());
+            balloonShooting.addPoint(player.getUniqueId());
             balloonShooting.removeBalloon(armorStand);
-            p.sendRichMessage("<green>Has disparado un globo! +1 punto");
+            player.sendMessage("§a¡Has disparado un globo! +1 punto");
         } else {
-            p.sendRichMessage("<red>Este no es un globo.");
+            player.sendMessage("§c¡No es un globo válido!");
         }
-
     }
 
 }
