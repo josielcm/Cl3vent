@@ -30,6 +30,7 @@ public class BalloonShootingEvents implements Listener {
         if (balloonShooting.isBalloon(armorStand)) {
             balloonShooting.addPoint(p.getUniqueId());
             balloonShooting.removeBalloon(armorStand);
+            p.sendRichMessage("<green>Has disparado un globo! +1 punto");
         } else {
             p.sendRichMessage("<red>Este no es un globo.");
         }
