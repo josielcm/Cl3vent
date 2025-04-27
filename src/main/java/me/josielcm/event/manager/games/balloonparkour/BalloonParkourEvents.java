@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -20,7 +21,6 @@ import org.bukkit.persistence.PersistentDataType;
 
 import me.josielcm.event.Cl3vent;
 import me.josielcm.event.api.Key;
-import me.josielcm.event.manager.games.GameType;
 
 public class BalloonParkourEvents implements Listener {
 
@@ -32,36 +32,32 @@ public class BalloonParkourEvents implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerMove(PlayerMoveEvent ev) {
-        if (!Cl3vent.getInstance().getEventManager().isInGame() ||
-            Cl3vent.getInstance().getEventManager().getActualGame() != GameType.BALLOONPARKOUR)
-            return;
 
         Player player = ev.getPlayer();
         UUID playerId = player.getUniqueId();
         BalloonParkour balloonParkour = getBalloonParkour();
 
-        if (player.hasPermission("cl3vent.bypass") || player.getWorld() != balloonParkour.getWorld())
+        Bukkit.getLogger().info("§eProcesando movimiento para: " + player.getName());
+
+        if (player.getWorld() != balloonParkour.getWorld()) // player.hasPermission("cl3vent.bypass") || 
             return;
 
-        // Solo procesar si el jugador realmente se movió de bloque
         Location to = ev.getTo();
         Location from = ev.getFrom();
-        if (to.getBlockX() == from.getBlockX() && 
-            to.getBlockY() == from.getBlockY() && 
-            to.getBlockZ() == from.getBlockZ())
+        if (to.getBlockX() == from.getBlockX() &&
+                to.getBlockY() == from.getBlockY() &&
+                to.getBlockZ() == from.getBlockZ())
             return;
 
         Location loc = to;
 
-        // Verificar zona final primero (prioridad más alta)
-        if (balloonParkour.getSafeContainer() != null && 
-            balloonParkour.getSafeContainer().isInside(loc)) {
+        if (balloonParkour.getSafeContainer() != null &&
+                balloonParkour.getSafeContainer().isInside(loc)) {
             if (!playersInSafeZone.contains(playerId)) {
                 playersInSafeZone.add(playerId);
                 balloonParkour.getNoElimination().add(playerId);
                 player.sendRichMessage("<green>¡Has llegado a la zona final! ¡Estás a salvo!");
-                
-                // Verificar si es el último checkpoint antes de la zona final
+
                 int lastCheckpoint = balloonParkour.getCheckpoints().size() - 1;
                 int playerCheckpoint = getPlayerCheckpoint(player);
                 if (playerCheckpoint == lastCheckpoint) {
@@ -71,7 +67,6 @@ public class BalloonParkourEvents implements Listener {
             return;
         }
 
-        // Optimización: Solo verificar checkpoints si el jugador está cerca de uno
         if (isInCheckpointArea(loc)) {
             int checkpoint = getCheckpoint(loc);
             if (checkpoint != -1) {
@@ -88,18 +83,16 @@ public class BalloonParkourEvents implements Listener {
     public void onInteract(PlayerInteractEvent ev) {
         Player player = ev.getPlayer();
 
-        if (!Cl3vent.getInstance().getEventManager().isInGame()) return;
-        if (Cl3vent.getInstance().getEventManager().getActualGame() != GameType.BALLOONPARKOUR) return;
-        if (player.hasPermission("cl3vent.bypass")) return;
-        if (player.getWorld() != getBalloonParkour().getWorld()) return;
-        
         // Corregir la condición de acción
-        if (ev.getAction() != Action.RIGHT_CLICK_BLOCK && ev.getAction() != Action.RIGHT_CLICK_AIR) return;
-        if (ev.getItem() == null || !ev.getItem().hasItemMeta()) return;
+        if (ev.getAction() != Action.RIGHT_CLICK_BLOCK && ev.getAction() != Action.RIGHT_CLICK_AIR) // player.hasPermission("cl3vent.bypass") || 
+            return;
+        if (ev.getItem() == null || !ev.getItem().hasItemMeta())
+            return;
 
         ItemStack item = ev.getItem();
         PersistentDataContainer data = item.getItemMeta().getPersistentDataContainer();
-        if (!data.has(Key.getParkourItemsKey())) return;
+        if (!data.has(Key.getParkourItemsKey()))
+            return;
 
         switch (data.get(Key.getParkourItemsKey(), PersistentDataType.STRING)) {
             case "checkpoint":
@@ -148,11 +141,11 @@ public class BalloonParkourEvents implements Listener {
         int x = location.getBlockX();
         int y = location.getBlockY();
         int z = location.getBlockZ();
-        
+
         for (Location checkpoint : getBalloonParkour().getCheckpoints().values()) {
             if (Math.abs(checkpoint.getBlockX() - x) <= 1 &&
-                Math.abs(checkpoint.getBlockY() - y) <= 1 &&
-                Math.abs(checkpoint.getBlockZ() - z) <= 1) {
+                    Math.abs(checkpoint.getBlockY() - y) <= 1 &&
+                    Math.abs(checkpoint.getBlockZ() - z) <= 1) {
                 return true;
             }
         }
@@ -164,12 +157,12 @@ public class BalloonParkourEvents implements Listener {
         int x = location.getBlockX();
         int y = location.getBlockY();
         int z = location.getBlockZ();
-        
+
         for (Map.Entry<Integer, Location> entry : getBalloonParkour().getCheckpoints().entrySet()) {
             Location checkpoint = entry.getValue();
             if (Math.abs(checkpoint.getBlockX() - x) <= 1 &&
-                Math.abs(checkpoint.getBlockY() - y) <= 1 &&
-                Math.abs(checkpoint.getBlockZ() - z) <= 1) {
+                    Math.abs(checkpoint.getBlockY() - y) <= 1 &&
+                    Math.abs(checkpoint.getBlockZ() - z) <= 1) {
                 return entry.getKey();
             }
         }

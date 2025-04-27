@@ -68,13 +68,11 @@ public class BalloonParkour {
     private Listener listener;
 
     public void prepare() {
-        // Crear el listener
         BalloonParkourEvents eventListener = new BalloonParkourEvents();
         this.listener = eventListener;
 
         Bukkit.getPluginManager().registerEvents(listener, Cl3vent.getInstance());
 
-        // Pre-clear collections
         players.clear();
         noElimination.clear();
         visibility.clear();
@@ -85,7 +83,7 @@ public class BalloonParkour {
         for (UUID playerId : eventPlayers) {
             Player p = Bukkit.getPlayer(playerId);
             if (p != null) {
-                players.put(playerId, 0);
+                players.put(playerId, -1);
                 visibility.put(playerId, true);
                 p.getInventory().clear();
                 p.teleport(spawn);
@@ -149,24 +147,30 @@ public class BalloonParkour {
     }
 
     public void reachCheckpoint(Player player, int checkpoint) {
-        if (!players.containsKey(player.getUniqueId()))
+        if (!players.containsKey(player.getUniqueId())) {
+            Cl3vent.getInstance().getLogger().warning("Player not in game: " + player.getName());
             return;
+        }
 
         int currentCheckpoint = players.get(player.getUniqueId());
+        Cl3vent.getInstance().getLogger().info("Player " + player.getName() + " attempting checkpoint " + checkpoint + 
+                                             " (current: " + currentCheckpoint + ")");
+
         // Solo actualizar si es el siguiente checkpoint
         if (checkpoint == currentCheckpoint + 1) {
             players.put(player.getUniqueId(), checkpoint);
-
-            // Mensajes personalizados según el progreso
+            
+            // Efectos y mensajes
+            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
+            
             if (checkpoint == checkpoints.size() - 1) {
                 player.sendRichMessage("<green>¡Último checkpoint alcanzado! <gray>Busca la <gold>zona final<gray>.");
             } else {
-                player.sendRichMessage("<green>Checkpoint " + checkpoint + " alcanzado! <gray>(" +
-                        checkpoint + "/" + (checkpoints.size() - 1) + ")");
+                player.sendRichMessage("<green>Checkpoint " + checkpoint + " alcanzado! <gray>(" + 
+                                     checkpoint + "/" + (checkpoints.size() - 1) + ")");
             }
-
-            // Efecto de sonido y partículas (opcional)
-            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
+            
+            Cl3vent.getInstance().getLogger().info("Player " + player.getName() + " reached checkpoint " + checkpoint);
         }
     }
 
