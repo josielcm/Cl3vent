@@ -67,7 +67,6 @@ public final class Cl3vent extends JavaPlugin {
             commandManager.unregisterCommands();
         }
 
-        FileManager.saveFiles();
         Log.onDisable();
     }
 
