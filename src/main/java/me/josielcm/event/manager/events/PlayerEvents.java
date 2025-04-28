@@ -13,6 +13,7 @@ public class PlayerEvents implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent ev) {
         Cl3vent.getInstance().getEventManager().getPlayers().add(ev.getPlayer().getUniqueId());
+        Cl3vent.getInstance().getEventManager().getAllPlayers().add(ev.getPlayer().getUniqueId());
 
         if (Cl3vent.getInstance().getEventManager().getSpawn() != null) {
             ev.getPlayer().teleport(Cl3vent.getInstance().getEventManager().getSpawn());
@@ -23,6 +24,7 @@ public class PlayerEvents implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent ev) {
         Cl3vent.getInstance().getEventManager().getPlayers().remove(ev.getPlayer().getUniqueId());
+        Cl3vent.getInstance().getEventManager().getAllPlayers().remove(ev.getPlayer().getUniqueId());
 
         switch (Cl3vent.getInstance().getEventManager().getActualGame()) {
             case CAKEFEVER:

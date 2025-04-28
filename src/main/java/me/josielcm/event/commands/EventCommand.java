@@ -48,6 +48,19 @@ public class EventCommand extends BaseCommand {
         }
     }
 
+    @Subcommand("stop")
+    @CommandPermission("cl3vent.command")
+    public void onStop(CommandSender sender) {
+        
+        if (Cl3vent.getInstance().getEventManager().getActualGame() == GameType.NONE) {
+            sender.sendMessage(Color.parse("<red>No game is currently running!"));
+            return;
+        }
+
+        sender.sendMessage(Color.parse("<yellow>Stopping game..."));
+        Cl3vent.getInstance().getEventManager().stopGame();
+    }
+
     @CatchUnknown
     public void onUnknownCommand(CommandSender sender) {
         sender.sendMessage(Color.parse("<yellow><bold>Base</bold> <gray>v1.0</gray> <yellow>by JosielCM</yellow>"));

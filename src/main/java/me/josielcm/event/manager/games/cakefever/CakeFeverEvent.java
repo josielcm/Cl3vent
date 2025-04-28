@@ -1,6 +1,7 @@
 package me.josielcm.event.manager.games.cakefever;
 
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -42,8 +43,9 @@ public class CakeFeverEvent implements Listener {
         CakeFever cakeFever = Cl3vent.getInstance().getEventManager().getCakeFever();
         if (cakeFever.isCakeLocation(ev.getClickedBlock().getLocation())) {
             ev.setCancelled(true);
-            cakeFever.randomPoint(player);
             ev.getClickedBlock().setType(Material.AIR);
+            cakeFever.randomPoint(player);
+            player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
         }
     }
 

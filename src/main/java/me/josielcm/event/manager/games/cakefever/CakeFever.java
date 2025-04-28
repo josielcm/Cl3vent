@@ -18,7 +18,11 @@ import org.bukkit.scheduler.BukkitTask;
 import lombok.Getter;
 import lombok.Setter;
 import me.josielcm.event.Cl3vent;
+import me.josielcm.event.api.formats.Color;
+import me.josielcm.event.api.formats.Format;
 import me.josielcm.event.api.utils.RandomUtils;
+import net.kyori.adventure.bossbar.BossBar;
+import net.kyori.adventure.title.Title;
 
 public class CakeFever {
 
@@ -44,6 +48,10 @@ public class CakeFever {
 
     @Getter
     @Setter
+    private Title titleMsg;
+
+    @Getter
+    @Setter
     private int limitElimination = 0;
 
     @Getter
@@ -54,11 +62,17 @@ public class CakeFever {
     @Setter
     private Listener listener;
 
+    @Getter
+    @Setter
+    private BossBar bossBar;
+
     private final ConcurrentHashMap<String, Boolean> cakeLocationCache = new ConcurrentHashMap<>();
 
     public void prepare() {
         CakeFeverEvent eventListener = new CakeFeverEvent();
         this.listener = eventListener;
+
+        titleMsg = Title.title(Color.parse(title), Color.parse("<gold>¡Encuentra los pasteles!"));
 
         Cl3vent.getInstance().getServer().getPluginManager().registerEvents(listener, Cl3vent.getInstance());
 
@@ -76,36 +90,16 @@ public class CakeFever {
         final Cl3vent plugin = Cl3vent.getInstance();
         final Set<UUID> eventPlayers = plugin.getEventManager().getPlayers();
 
-        List<Player> validPlayers = new ArrayList<>();
-        List<UUID> invalidPlayers = new ArrayList<>();
-
-        for (UUID playerId : eventPlayers) {
-            Player p = Bukkit.getPlayer(playerId);
+        eventPlayers.forEach(player -> {
+            Player p = Bukkit.getPlayer(player);
             if (p != null) {
-                points.put(playerId, 0);
-                validPlayers.add(p);
-            } else {
-                invalidPlayers.add(playerId);
+                points.put(player, 0);
+                p.setGameMode(org.bukkit.GameMode.ADVENTURE);
+                p.showTitle(titleMsg);
+                p.teleport(spawn);
+
             }
-
-        }
-
-        if (!validPlayers.isEmpty()) {
-            final int BATCH_SIZE = 20;
-            for (int i = 0; i < validPlayers.size(); i += BATCH_SIZE) {
-                final int batchIndex = i;
-                Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                    int end = Math.min(batchIndex + BATCH_SIZE, validPlayers.size());
-                    for (int j = batchIndex; j < end; j++) {
-                        validPlayers.get(j).teleport(spawn);
-                    }
-                }, i / BATCH_SIZE);
-            }
-        }
-
-        if (!invalidPlayers.isEmpty()) {
-            eventPlayers.removeAll(invalidPlayers);
-        }
+        });
 
         start();
     }
@@ -114,6 +108,19 @@ public class CakeFever {
         final Cl3vent plugin = Cl3vent.getInstance();
         final AtomicInteger time = new AtomicInteger(60);
 
+        bossBar = BossBar.bossBar(
+                Color.parse("<gold><b>" + Format.formatTime(time.get())),
+                0.0f,
+                BossBar.Color.YELLOW,
+                BossBar.Overlay.PROGRESS);
+
+        for (UUID playerId : plugin.getEventManager().getAllPlayers()) {
+            Player p = Bukkit.getPlayer(playerId);
+            if (p != null) {
+                p.showBossBar(bossBar);
+            }
+        }
+
         task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
             int currentTime = time.getAndDecrement();
             if (currentTime <= 0) {
@@ -121,8 +128,7 @@ public class CakeFever {
                 return;
             }
 
-            String message = "Time: " + currentTime;
-            plugin.getEventManager().sendActionBar(message);
+            bossBar.name(Color.parse("<gold><b>" + Format.formatTime(currentTime)));
 
             if (currentTime % 30 == 0) {
                 Bukkit.getScheduler().runTaskLater(plugin, this::regenerateCakes, 1L);
@@ -133,6 +139,13 @@ public class CakeFever {
     public void stop() {
         if (task != null) {
             task.cancel();
+        }
+
+        for (UUID playerId : Cl3vent.getInstance().getEventManager().getAllPlayers()) {
+            Player p = Bukkit.getPlayer(playerId);
+            if (p != null) {
+                p.hideBossBar(bossBar);
+            }
         }
 
         removeCakes();

@@ -33,6 +33,10 @@ public class EventManager {
 
     @Getter
     @Setter
+    Set<UUID> allPlayers = new HashSet<>();
+    
+    @Getter
+    @Setter
     Set<UUID> players = new HashSet<>();
 
     @Getter

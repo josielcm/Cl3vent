@@ -22,8 +22,12 @@ import lombok.Getter;
 import lombok.Setter;
 import me.josielcm.event.Cl3vent;
 import me.josielcm.event.api.Key;
+import me.josielcm.event.api.formats.Color;
+import me.josielcm.event.api.formats.Format;
 import me.josielcm.event.api.items.ItemBuilder;
 import me.josielcm.event.api.regions.Container;
+import net.kyori.adventure.bossbar.BossBar;
+import net.kyori.adventure.title.Title;
 
 public class BalloonParkour {
 
@@ -53,6 +57,10 @@ public class BalloonParkour {
 
     @Getter
     @Setter
+    private Title titleMsg;
+
+    @Getter
+    @Setter
     private Set<UUID> noElimination = ConcurrentHashMap.newKeySet();
 
     @Getter
@@ -67,9 +75,15 @@ public class BalloonParkour {
     @Setter
     private Listener listener;
 
+    @Getter
+    @Setter
+    private BossBar bossBar;
+
     public void prepare() {
         BalloonParkourEvents eventListener = new BalloonParkourEvents();
         this.listener = eventListener;
+
+        titleMsg = Title.title(Color.parse(title), Color.parse("<gold>¡Completa el parkour!"));
 
         Bukkit.getPluginManager().registerEvents(listener, Cl3vent.getInstance());
 
@@ -85,6 +99,8 @@ public class BalloonParkour {
             if (p != null) {
                 players.put(playerId, -1);
                 visibility.put(playerId, true);
+                p.setGameMode(org.bukkit.GameMode.ADVENTURE);
+                p.showTitle(titleMsg);
                 p.getInventory().clear();
                 p.teleport(spawn);
             } else {
@@ -96,12 +112,28 @@ public class BalloonParkour {
     }
 
     public void start() {
-        // Give items with batch processing
+        if (task != null) {
+            task.cancel();
+            task = null;
+        }
+
         giveItemsOptimized();
 
-        // More efficient timer implementation
         final Cl3vent plugin = Cl3vent.getInstance();
         final AtomicInteger time = new AtomicInteger(60);
+
+        bossBar = BossBar.bossBar(
+                Color.parse("<gold><b>" + Format.formatTime(time.get())),
+                0.0f,
+                BossBar.Color.YELLOW,
+                BossBar.Overlay.PROGRESS);
+
+        for (UUID playerId : plugin.getEventManager().getAllPlayers()) {
+            Player p = Bukkit.getPlayer(playerId);
+            if (p != null) {
+                p.showBossBar(bossBar);
+            }
+        }
 
         task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
             int currentTime = time.getAndDecrement();
@@ -110,8 +142,7 @@ public class BalloonParkour {
                 return;
             }
 
-            String message = "Time: " + currentTime;
-            plugin.getEventManager().sendActionBar(message);
+            bossBar.name(Color.parse("<gold><b>" + Format.formatTime(currentTime)));
 
         }, 0L, 20L);
 
@@ -153,23 +184,23 @@ public class BalloonParkour {
         }
 
         int currentCheckpoint = players.get(player.getUniqueId());
-        Cl3vent.getInstance().getLogger().info("Player " + player.getName() + " attempting checkpoint " + checkpoint + 
-                                             " (current: " + currentCheckpoint + ")");
+        Cl3vent.getInstance().getLogger().info("Player " + player.getName() + " attempting checkpoint " + checkpoint +
+                " (current: " + currentCheckpoint + ")");
 
         // Solo actualizar si es el siguiente checkpoint
         if (checkpoint == currentCheckpoint + 1) {
             players.put(player.getUniqueId(), checkpoint);
-            
+
             // Efectos y mensajes
             player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
-            
+
             if (checkpoint == checkpoints.size() - 1) {
                 player.sendRichMessage("<green>¡Último checkpoint alcanzado! <gray>Busca la <gold>zona final<gray>.");
             } else {
-                player.sendRichMessage("<green>Checkpoint " + checkpoint + " alcanzado! <gray>(" + 
-                                     checkpoint + "/" + (checkpoints.size() - 1) + ")");
+                player.sendRichMessage("<green>Checkpoint " + checkpoint + " alcanzado! <gray>(" +
+                        checkpoint + "/" + (checkpoints.size() - 1) + ")");
             }
-            
+
             Cl3vent.getInstance().getLogger().info("Player " + player.getName() + " reached checkpoint " + checkpoint);
         }
     }

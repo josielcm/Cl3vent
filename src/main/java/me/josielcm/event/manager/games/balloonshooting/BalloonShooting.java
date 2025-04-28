@@ -23,7 +23,9 @@ import lombok.Getter;
 import lombok.Setter;
 import me.josielcm.event.Cl3vent;
 import me.josielcm.event.api.formats.Color;
+import me.josielcm.event.api.formats.Format;
 import me.josielcm.event.api.items.ItemBuilder;
+import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.title.Title;
 
 public class BalloonShooting {
@@ -69,10 +71,11 @@ public class BalloonShooting {
     private Listener listener;
 
     @Getter
-    private final Cl3vent plugin = Cl3vent.getInstance();
+    @Setter
+    private BossBar bossBar;
 
     @Getter
-    final Set<UUID> eventPlayers = plugin.getEventManager().getPlayers();
+    private final Cl3vent plugin = Cl3vent.getInstance();
 
     public void prepare() {
         points.clear();
@@ -86,6 +89,7 @@ public class BalloonShooting {
         regenerateBalloons();
 
         List<UUID> playersToRemove = new ArrayList<>();
+        Set<UUID> eventPlayers = plugin.getEventManager().getPlayers();
 
         for (UUID playerId : eventPlayers) {
             Player p = Bukkit.getPlayer(playerId);
@@ -114,7 +118,7 @@ public class BalloonShooting {
                 return;
             }
 
-            String message = "Iniciando en: " + currentTime;
+            String message = "Iniciando en: " + Format.formatTime(currentTime);
             plugin.getEventManager().sendActionBar(message);
 
         }, 0L, 20L);
@@ -128,6 +132,19 @@ public class BalloonShooting {
 
         final AtomicInteger time = new AtomicInteger(60);
 
+        bossBar = BossBar.bossBar(
+                Color.parse("<gold><b>" + Format.formatTime(time.get())),
+                0.0f,
+                BossBar.Color.YELLOW,
+                BossBar.Overlay.PROGRESS);
+
+        for (UUID playerId : plugin.getEventManager().getAllPlayers()) {
+            Player p = Bukkit.getPlayer(playerId);
+            if (p != null) {
+                p.showBossBar(bossBar);
+            }
+        }
+
         giveItems();
 
         Cl3vent.getInstance().getEventManager().sendMessage("¡El juego ha comenzado!");
@@ -140,8 +157,7 @@ public class BalloonShooting {
                 return;
             }
 
-            String message = "Time: " + currentTime;
-            plugin.getEventManager().sendActionBar(message);
+            bossBar.name(Color.parse("<gold><b>" + Format.formatTime(currentTime)));
 
             if (currentTime % 30 == 0) {
                 Bukkit.getScheduler().runTaskLater(plugin, this::regenerateBalloons, 1L);
@@ -211,7 +227,7 @@ public class BalloonShooting {
                 .amount(1)
                 .build();
 
-        eventPlayers.forEach(playerId -> {
+        plugin.getEventManager().getPlayers().forEach(playerId -> {
             Player player = Bukkit.getPlayer(playerId);
             if (player != null) {
                 player.getInventory().clear();
