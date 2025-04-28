@@ -167,7 +167,6 @@ public class CakeFever {
         boolean isCake = RandomUtils.randomBool();
         UUID playerId = player.getUniqueId();
 
-        // Usar computeIfPresent para operaciones atómicas
         if (isCake) {
             points.compute(playerId, (k, v) -> v == null ? 1 : v + 1);
             player.sendRichMessage("<aqua>+1</aqua>");
@@ -178,7 +177,7 @@ public class CakeFever {
                 int reducedPoints = RandomUtils.randomInt(1, 3);
                 return Math.max(0, v - reducedPoints);
             });
-            player.sendRichMessage("<red>-" + RandomUtils.randomInt(1, 3) + "</red>");
+            player.sendRichMessage("<red>-" + RandomUtils.randomInt(1, 2) + "</red>");
         }
 
         player.sendRichMessage("<gray>Points: " + points.get(playerId) + "</gray>");
