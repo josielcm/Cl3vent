@@ -48,8 +48,9 @@ public class BalloonArmorModel {
     public void startTask() {
         task = Bukkit.getScheduler().runTaskTimer(Cl3vent.getInstance(), new Runnable() {
             private Location targetLocation = getRandomLocationInside();
-            private double step = 0.05;
+            private double step = 0.02;
             private double progress = 0.0;
+            private int movementCounter = 0;
 
             @Override
             public void run() {
@@ -60,21 +61,35 @@ public class BalloonArmorModel {
 
                 Location currentLocation = armorStand.getLocation();
 
+                if (progress >= 1.0 || movementCounter >= 100) {
+                    targetLocation = getRandomLocationInside();
+                    progress = 0.0;
+                    movementCounter = 0;
+                    
+                }
+
                 double newX = currentLocation.getX() + (targetLocation.getX() - currentLocation.getX()) * step;
                 double newY = currentLocation.getY() + (targetLocation.getY() - currentLocation.getY()) * step;
                 double newZ = currentLocation.getZ() + (targetLocation.getZ() - currentLocation.getZ()) * step;
 
-                double randomYOffset = ThreadLocalRandom.current().nextDouble(-0.1, 0.4);
+                double amplitude = 0.2; 
+                double frequency = 0.1;
+                double randomYOffset = Math.sin(progress * Math.PI * 2 * frequency) * amplitude;
                 newY += randomYOffset;
+
+                double randomXOffset = ThreadLocalRandom.current().nextDouble(-0.05, 0.05);
+                double randomZOffset = ThreadLocalRandom.current().nextDouble(-0.05, 0.05);
+                newX += randomXOffset;
+                newZ += randomZOffset;
+
+                newX = Math.min(Math.max(newX, Math.min(pos1.getX(), pos2.getX())), Math.max(pos1.getX(), pos2.getX()));
+                newY = Math.min(Math.max(newY, Math.min(pos1.getY(), pos2.getY())), Math.max(pos1.getY(), pos2.getY()));
+                newZ = Math.min(Math.max(newZ, Math.min(pos1.getZ(), pos2.getZ())), Math.max(pos1.getZ(), pos2.getZ()));
 
                 armorStand.teleport(new Location(currentLocation.getWorld(), newX, newY, newZ));
 
                 progress += step;
-
-                if (progress >= 1.0) {
-                    targetLocation = getRandomLocationInside();
-                    progress = 0.0;
-                }
+                movementCounter++;
             }
         }, 0L, 1L);
     }
