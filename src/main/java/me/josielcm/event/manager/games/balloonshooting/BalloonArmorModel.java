@@ -32,8 +32,15 @@ public class BalloonArmorModel {
     private BukkitTask task;
 
     public BalloonArmorModel(Location pos1, Location pos2) {
-        this.pos1 = pos1;
-        this.pos2 = pos2;
+        if (pos1 == null || pos2 == null) {
+            throw new IllegalArgumentException("Positions cannot be null");
+        }
+        if (pos1.getWorld() == null || pos2.getWorld() == null || !pos1.getWorld().equals(pos2.getWorld())) {
+            throw new IllegalArgumentException("Positions must be in the same world");
+        }
+
+        this.pos1 = pos1.clone();
+        this.pos2 = pos2.clone();
         this.location = getRandomLocationInside();
         buildArmorStand();
     }
@@ -79,13 +86,20 @@ public class BalloonArmorModel {
 
         int maxAttempts = 100;
         for (int attempt = 0; attempt < maxAttempts; attempt++) {
-            double x = ThreadLocalRandom.current().nextDouble(pos1.getX(), pos2.getX());
-            double y = ThreadLocalRandom.current().nextDouble(pos1.getY(), pos2.getY());
-            double z = ThreadLocalRandom.current().nextDouble(pos1.getZ(), pos2.getZ());
+            double minX = Math.min(pos1.getX(), pos2.getX());
+            double maxX = Math.max(pos1.getX(), pos2.getX());
+            double minY = Math.min(pos1.getY(), pos2.getY());
+            double maxY = Math.max(pos1.getY(), pos2.getY());
+            double minZ = Math.min(pos1.getZ(), pos2.getZ());
+            double maxZ = Math.max(pos1.getZ(), pos2.getZ());
+
+            double x = ThreadLocalRandom.current().nextDouble(minX, maxX);
+            double y = ThreadLocalRandom.current().nextDouble(minY, maxY);
+            double z = ThreadLocalRandom.current().nextDouble(minZ, maxZ);
 
             Location randomLocation = new Location(pos1.getWorld(), x, y, z);
 
-            if (randomLocation.getWorld().getBlockAt(randomLocation).getType() == Material.AIR) {
+            if (randomLocation.getBlock().getType() == Material.AIR) {
                 return randomLocation;
             }
         }

@@ -265,11 +265,20 @@ public class BalloonShooting {
     }
 
     private void regenerateBalloons() {
+        if (pos1 == null || pos2 == null) {
+            Bukkit.getLogger().warning("Cannot regenerate balloons: positions not set");
+            return;
+        }
+
         removeAllBalloons();
 
-        for (int i = 0; i < 20; i++) {
-            BalloonArmorModel balloon = new BalloonArmorModel(pos1, pos2);
-            balloons.add(balloon);
+        try {
+            for (int i = 0; i < 20; i++) {
+                BalloonArmorModel balloon = new BalloonArmorModel(pos1, pos2);
+                balloons.add(balloon);
+            }
+        } catch (IllegalArgumentException e) {
+            Bukkit.getLogger().severe("Error regenerating balloons: " + e.getMessage());
         }
     }
 
