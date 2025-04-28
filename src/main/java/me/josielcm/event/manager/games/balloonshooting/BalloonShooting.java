@@ -177,23 +177,23 @@ public class BalloonShooting {
             task.cancel();
         }
 
+        Cl3vent.getInstance().getEventManager().getPlayers().forEach(player -> {
+            Player p = Bukkit.getPlayer(player);
+
+            if (p != null) {
+                p.hideBossBar(bossBar);
+                p.getInventory().clear();
+            } else {
+                plugin.getEventManager().getPlayers().remove(player);
+            }
+        });
+
         removeAllBalloons();
 
         List<UUID> playersToEliminate = get10MenusPoints();
 
         Cl3vent.getInstance().getEventManager().sendActionBar("¡Juego terminado!");
         Cl3vent.getInstance().getEventManager().playSound(Sound.ENTITY_WARDEN_HEARTBEAT);
-
-
-        Cl3vent.getInstance().getEventManager().sendMessage("Eliminando jugadores...");
-
-        Cl3vent.getInstance().getEventManager().sendMessage("Jugadores a eliminar:");
-        playersToEliminate.forEach(playerId -> {
-            Player player = Bukkit.getPlayer(playerId);
-            if (player != null) {
-                Cl3vent.getInstance().getEventManager().sendMessage("- " + player.getName() + " | " + points.get(playerId) + " puntos");
-            }
-        });
 
         Bukkit.getScheduler().runTask(Cl3vent.getInstance(), () -> {
             for (UUID player : playersToEliminate) {

@@ -157,6 +157,8 @@ public class BalloonParkour {
             Player p = Bukkit.getPlayer(player);
 
             if (p != null) {
+                p.hideBossBar(bossBar);
+
                 if (!p.hasPermission("cl3vent.bypass")) {
                     p.getInventory().clear();
                     p.teleport(spawn);
