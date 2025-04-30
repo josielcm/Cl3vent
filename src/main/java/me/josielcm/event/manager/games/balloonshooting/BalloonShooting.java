@@ -58,9 +58,9 @@ public class BalloonShooting {
     @Setter
     private String title = "Balloon Shooting";
 
-    @Getter
-    @Setter
-    private Title titleMsg;
+    // @Getter
+    // @Setter
+    // private Title titleMsg;
 
     @Getter
     @Setter
@@ -80,7 +80,7 @@ public class BalloonShooting {
     public void prepare() {
         points.clear();
 
-        titleMsg = Title.title(Color.parse(title), Color.parse("<gold>¡Dispara a los globos!"));
+        // titleMsg = Title.title(Color.parse(title), Color.parse("<gold>¡Dispara a los globos!"));
 
         listener = new BalloonShootingEvents();
 
@@ -96,7 +96,7 @@ public class BalloonShooting {
             if (p != null) {
                 points.put(playerId, 0);
                 p.teleport(spawn);
-                p.showTitle(titleMsg);
+                // p.showTitle(titleMsg);
                 p.setGameMode(org.bukkit.GameMode.ADVENTURE);
             } else {
                 playersToRemove.add(playerId);

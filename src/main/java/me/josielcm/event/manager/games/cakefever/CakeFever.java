@@ -46,9 +46,9 @@ public class CakeFever {
     @Setter
     private String title = "Cake Fever";
 
-    @Getter
-    @Setter
-    private Title titleMsg;
+    // @Getter
+    // @Setter
+    // private Title titleMsg;
 
     @Getter
     @Setter
@@ -72,7 +72,11 @@ public class CakeFever {
         CakeFeverEvent eventListener = new CakeFeverEvent();
         this.listener = eventListener;
 
-        titleMsg = Title.title(Color.parse(title), Color.parse("<gold>¡Encuentra los pasteles!"));
+        // if (title == null) {
+        //     titleMsg = Title.title(Color.parse("<"), Color.parse("<gold>¡Encuentra los pasteles!"));
+        // } else {
+        //     titleMsg = Title.title(Color.parse(title), Color.parse("<gold>¡Encuentra los pasteles!"));
+        // }
 
         Cl3vent.getInstance().getServer().getPluginManager().registerEvents(listener, Cl3vent.getInstance());
 
@@ -95,7 +99,7 @@ public class CakeFever {
             if (p != null) {
                 points.put(player, 0);
                 p.setGameMode(org.bukkit.GameMode.ADVENTURE);
-                p.showTitle(titleMsg);
+                // p.showTitle(titleMsg);
                 p.teleport(spawn);
 
             }
