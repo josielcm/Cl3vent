@@ -46,9 +46,9 @@ public class CakeFever {
     @Setter
     private String title = "Cake Fever";
 
-    // @Getter
-    // @Setter
-    // private Title titleMsg;
+    @Getter
+    @Setter
+    private Title titleMsg;
 
     @Getter
     @Setter
@@ -71,12 +71,8 @@ public class CakeFever {
     public void prepare() {
         CakeFeverEvent eventListener = new CakeFeverEvent();
         this.listener = eventListener;
-
-        // if (title == null) {
-        //     titleMsg = Title.title(Color.parse("<"), Color.parse("<gold>¡Encuentra los pasteles!"));
-        // } else {
-        //     titleMsg = Title.title(Color.parse(title), Color.parse("<gold>¡Encuentra los pasteles!"));
-        // }
+        
+        titleMsg = Title.title(Color.parse(title), Color.parse("<gold>¡Encuentra los pasteles!"));
 
         Cl3vent.getInstance().getServer().getPluginManager().registerEvents(listener, Cl3vent.getInstance());
 
@@ -92,14 +88,16 @@ public class CakeFever {
         setCakesBlock();
 
         final Cl3vent plugin = Cl3vent.getInstance();
-        final Set<UUID> eventPlayers = plugin.getEventManager().getPlayers();
+        final Set<UUID> eventPlayers = plugin.getEventManager().getAllPlayers();
 
         eventPlayers.forEach(player -> {
             Player p = Bukkit.getPlayer(player);
             if (p != null) {
                 points.put(player, 0);
-                p.setGameMode(org.bukkit.GameMode.ADVENTURE);
-                // p.showTitle(titleMsg);
+                if (!p.hasPermission("cl3vent.bypass")) {
+                    p.setGameMode(org.bukkit.GameMode.ADVENTURE);
+                }
+                p.showTitle(titleMsg);
                 p.teleport(spawn);
 
             }

@@ -1,0 +1,56 @@
+settings:
+  title: "<gold>REGALOS GIGANTES!</gold>"
+  limit-elimination: 20
+  world: continental
+  spawn:
+    x: 0
+    y: 90
+    z: 0
+
+gifts:
+  0:
+    pos1:
+      x: 0
+      y: 90
+      z: 0
+    pos2:
+      x: 0
+      y: 90
+      z: 0
+  1:
+    pos1:
+      x: 0
+      y: 90
+      z: 0
+    pos2:
+      x: 0
+      y: 90
+      z: 0
+  2:
+    pos1:
+      x: 0
+      y: 90
+      z: 0
+    pos2:
+      x: 0
+      y: 90
+      z: 0
+  3:
+    pos1:
+      x: 0
+      y: 90
+      z: 0
+    pos2:
+      x: 0
+      y: 90
+      z: 0
+  4:
+    pos1:
+      x: 0
+      y: 90
+      z: 0
+    pos2:
+      x: 0
+      y: 90
+      z: 0
+  

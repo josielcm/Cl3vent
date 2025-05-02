@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,6 +26,8 @@ import me.josielcm.event.manager.games.GameType;
 import me.josielcm.event.manager.games.balloonparkour.BalloonParkour;
 import me.josielcm.event.manager.games.balloonshooting.BalloonShooting;
 import me.josielcm.event.manager.games.cakefever.CakeFever;
+import me.josielcm.event.manager.games.giantgift.GiantGift;
+import me.josielcm.event.manager.games.giantgift.Gift;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import net.kyori.adventure.title.Title.Times;
@@ -34,7 +37,7 @@ public class EventManager {
     @Getter
     @Setter
     Set<UUID> allPlayers = new HashSet<>();
-    
+
     @Getter
     @Setter
     Set<UUID> players = new HashSet<>();
@@ -50,6 +53,10 @@ public class EventManager {
     @Getter
     @Setter
     private BalloonShooting balloonShooting;
+
+    @Getter
+    @Setter
+    private GiantGift giantGift;
 
     @Getter
     @Setter
@@ -81,7 +88,7 @@ public class EventManager {
 
     public void instanceGames() {
         cakeFever = new CakeFever();
-        String title = FileManager.getCakefever().getString("settigns.title");
+        String title = FileManager.getCakefever().getString("settings.title");
         int limitElimination = FileManager.getCakefever().getInt("settings.limit-elimination");
         String worldS = FileManager.getCakefever().getString("settings.world");
 
@@ -186,12 +193,54 @@ public class EventManager {
         balloonShooting.setPos2(pos2);
         balloonShooting.setWorld(Bukkit.getWorld(worldSBalloonShooting));
 
+        String titleGiantGift = FileManager.getGiantgift().getString("settings.title");
+        worldS = FileManager.getGiantgift().getString("settings.world");
+
+        xSpawn = FileManager.getGiantgift().getInt("settings.spawn.x");
+        ySpawn = FileManager.getGiantgift().getInt("settings.spawn.y");
+        zSpawn = FileManager.getGiantgift().getInt("settings.spawn.z");
+
+        if (Bukkit.getWorld(worldS) == null) {
+            Log.log(LogLevel.ERROR, "World " + worldS + " not found for GiantGift");
+            return;
+        }
+
+        spawn = new Location(Bukkit.getWorld(worldS), xSpawn, ySpawn, zSpawn);
+
+        Set<Gift> gifts = new HashSet<>();
+
+        for (String key : FileManager.getGiantgift().getConfigurationSection("gifts").getKeys(false)) {
+            int xGift = FileManager.getGiantgift().getInt("gifts." + key + ".pos1.x");
+            int yGift = FileManager.getGiantgift().getInt("gifts." + key + ".pos1.y");
+            int zGift = FileManager.getGiantgift().getInt("gifts." + key + ".pos1.z");
+
+            int xGift2 = FileManager.getGiantgift().getInt("gifts." + key + ".pos2.x");
+            int yGift2 = FileManager.getGiantgift().getInt("gifts." + key + ".pos2.y");
+            int zGift2 = FileManager.getGiantgift().getInt("gifts." + key + ".pos2.z");
+
+            Location gift = new Location(Bukkit.getWorld(worldS), xGift, yGift, zGift);
+            Location gift2 = new Location(Bukkit.getWorld(worldS), xGift2, yGift2, zGift2);
+
+            Gift giftObj = new Gift(gift, gift2);
+            giftObj.setId(new Random().nextInt(1000));
+
+            gifts.add(giftObj);
+        }
+
+        giantGift = new GiantGift();
+        giantGift.setTitle(titleGiantGift);
+        giantGift.setSpawn(spawn);
+        giantGift.setGifts(gifts);
+        giantGift.setWorld(Bukkit.getWorld(worldS));
+        giantGift.setLimitElimination(FileManager.getGiantgift().getInt("settings.limit-elimination"));
+
         Log.log(LogLevel.INFO, "CakeFever loaded with " + cakes.size() + " cakes");
         Log.log(LogLevel.INFO, "BalloonParkour loaded with " + checkpoints.size() + " checkpoints");
         Log.log(LogLevel.INFO,
                 "BalloonShooting loaded with region: " + pos1.getBlockX() + ", " + pos1.getBlockY() + ", "
                         + pos1.getBlockZ() + " and " + pos2.getBlockX() + ", " + pos2.getBlockY() + ", "
                         + pos2.getBlockZ());
+        Log.log(LogLevel.INFO, "GiantGift loaded with " + gifts.size() + " gifts");
 
     }
 
@@ -214,6 +263,9 @@ public class EventManager {
             case BALLONSHOOTING:
                 balloonShooting.prepare();
                 break;
+            case GIANTGIFT:
+                giantGift.prepare();
+                break;
             default:
                 break;
         }
@@ -234,6 +286,9 @@ public class EventManager {
                 break;
             case BALLONSHOOTING:
                 balloonShooting.stop();
+                break;
+            case GIANTGIFT:
+                giantGift.end();
                 break;
             default:
                 break;

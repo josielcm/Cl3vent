@@ -1,5 +1,36 @@
 package me.josielcm.event.manager.games.giantgift;
 
-public class GiantGiftEvents {
+import org.bukkit.Location;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerMoveEvent;
+
+import me.josielcm.event.Cl3vent;
+import me.josielcm.event.manager.EventManager;
+
+public class GiantGiftEvents implements Listener {
+
+    @EventHandler
+    private void onEnterGift(PlayerMoveEvent ev) {
+        if (ev.getTo() == null || !hasMoved(ev)) {
+            return;
+        }
+
+        Cl3vent plugin = Cl3vent.getInstance();
+        EventManager eventManager = plugin.getEventManager();
+
+        Location loc = ev.getTo().clone();
+
+        if (eventManager.getGiantGift().isGift(loc)) {
+            eventManager.getGiantGift().safePlayer(ev.getPlayer().getUniqueId(), loc);
+        }
+
+    }
+
+    private boolean hasMoved(PlayerMoveEvent ev) {
+        return ev.getFrom().getBlockX() != ev.getTo().getBlockX()
+                || ev.getFrom().getBlockY() != ev.getTo().getBlockY()
+                || ev.getFrom().getBlockZ() != ev.getTo().getBlockZ();
+    }
     
 }

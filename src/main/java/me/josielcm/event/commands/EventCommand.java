@@ -24,12 +24,19 @@ public class EventCommand extends BaseCommand {
         if (gameType.equalsIgnoreCase("cakefever")) {
             Cl3vent.getInstance().getEventManager().startGame(GameType.CAKEFEVER);
             sender.sendMessage(Color.parse("<green>Game started!"));
+
         } else if (gameType.equalsIgnoreCase("parkour")) {
             Cl3vent.getInstance().getEventManager().startGame(GameType.BALLOONPARKOUR);
             sender.sendMessage(Color.parse("<green>Game started!"));
+
         } else if (gameType.equalsIgnoreCase("bs")) {
             Cl3vent.getInstance().getEventManager().startGame(GameType.BALLONSHOOTING);
             sender.sendMessage(Color.parse("<green>Game started!"));
+
+        } else if (gameType.equalsIgnoreCase("gift")) {
+            Cl3vent.getInstance().getEventManager().startGame(GameType.GIANTGIFT);
+            sender.sendMessage(Color.parse("<green>Game started!"));
+
         } else {
             sender.sendMessage(Color.parse("<red>Invalid game type!"));
         }
@@ -51,7 +58,7 @@ public class EventCommand extends BaseCommand {
     @Subcommand("stop")
     @CommandPermission("cl3vent.command")
     public void onStop(CommandSender sender) {
-        
+
         if (Cl3vent.getInstance().getEventManager().getActualGame() == GameType.NONE) {
             sender.sendMessage(Color.parse("<red>No game is currently running!"));
             return;
