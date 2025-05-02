@@ -7,6 +7,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitTask;
 
 import lombok.Getter;
@@ -143,14 +144,16 @@ public class BalloonArmorModel {
         armorStand.setCustomNameVisible(false);
         armorStand.setBasePlate(false);
         armorStand.setGlowing(true);
+        
+        ItemStack balloonTextured = new ItemStack(Material.SLIME_BALL);
+        ItemMeta meta = balloonTextured.getItemMeta();
 
-        ItemStack balloon = ItemBuilder.builder()
-                .material(Material.LEATHER_HELMET)
-                .displayName("<gold>BALLOON")
-                .customModelData(10000)
-                .build();
+        if (meta != null) {
+            meta.setCustomModelData(10000);
+            balloonTextured.setItemMeta(meta);
+        }
 
-        armorStand.getEquipment().setHelmet(balloon);
+        armorStand.getEquipment().setHelmet(balloonTextured);
 
         startTask();
     }
