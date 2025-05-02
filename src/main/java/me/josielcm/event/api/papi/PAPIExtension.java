@@ -37,70 +37,59 @@ public class PAPIExtension extends PlaceholderExpansion {
     @Override
     public String onRequest(OfflinePlayer player, String params) {
         if (player == null) {
-            if (params.startsWith("player_checkpoint_")) {
-                String playerName = params.substring(18);
+            return "NONE";
+        }
 
-                if (playerName == null || playerName.isEmpty()) {
-                    return "NONE";
-                }
-                
-                UUID uuid = Bukkit.getPlayerUniqueId(playerName);
+        if (params.startsWith("player_checkpoint_")) {
+            String playerName = params.substring(18);
 
-                if (uuid == null) {
-                    return "NONE";
-                }
-    
-                if (Cl3vent.getInstance().getEventManager().getActualGame() != null && Cl3vent.getInstance().getEventManager().getActualGame() == GameType.BALLOONPARKOUR) {
+            if (playerName == null || playerName.isEmpty()) {
+                return "NONE";
+            }
+            
+            UUID uuid = Bukkit.getPlayerUniqueId(playerName);
 
-                    if (!Cl3vent.getInstance().getEventManager().getBalloonParkour().getPlayers().containsKey(uuid)) {
-                        return "NONE";
-                    }
-
-                    int checkpoint = Cl3vent.getInstance().getEventManager().getBalloonParkour().getPlayers().get(uuid);
-                    return String.valueOf(checkpoint);
-                }
-
+            if (uuid == null) {
                 return "NONE";
             }
 
-            if (params.startsWith("checkpoint_")) {
-                String check = params.substring(12);
-                int checkpoint = -1;
+            if (Cl3vent.getInstance().getEventManager().getActualGame() != null && Cl3vent.getInstance().getEventManager().getActualGame() == GameType.BALLOONPARKOUR) {
 
-                try {
-                    checkpoint = Integer.parseInt(check);
-                    if (checkpoint < 0) {
-                        return "NONE";
-                    }
-                } catch (NumberFormatException e) {
+                if (!Cl3vent.getInstance().getEventManager().getBalloonParkour().getPlayers().containsKey(uuid)) {
                     return "NONE";
                 }
-                
 
-                if (Cl3vent.getInstance().getEventManager().getActualGame() != null && Cl3vent.getInstance().getEventManager().getActualGame() == GameType.BALLOONPARKOUR) {
-
-                    if (!Cl3vent.getInstance().getEventManager().getBalloonParkour().getCheckpoints().containsKey(checkpoint)) {
-                        Location loc = Cl3vent.getInstance().getEventManager().getBalloonParkour().getCheckpoints().get(checkpoint);
-
-                        if (loc != null) {
-                            return loc.getX() + " " + loc.getY() + " " + loc.getZ();
-                        } else {
-                            return "NONE";
-                        }
-
-                    }
-                }
-
-                return "NONE";
+                int checkpoint = Cl3vent.getInstance().getEventManager().getBalloonParkour().getPlayers().get(uuid);
+                return String.valueOf(checkpoint);
             }
 
+            return "NONE";
+        }
 
+        if (params.startsWith("checkpoint_")) {
+            String check = params.substring(11);
+            int checkpoint = -1;
 
-
-
-
-
-
+            try {
+                checkpoint = Integer.parseInt(check);
+                if (checkpoint < 0) {
+                    return "NONE";
+                }
+            } catch (NumberFormatException e) {
+                return "NONE";
+            }
+            
+            var eventManager = Cl3vent.getInstance().getEventManager();
+            if (eventManager.getActualGame() == GameType.BALLOONPARKOUR) {
+                var balloonParkour = eventManager.getBalloonParkour();
+                if (balloonParkour.getCheckpoints().containsKey(checkpoint)) {
+                    Location loc = balloonParkour.getCheckpoints().get(checkpoint);
+                    if (loc != null) {
+                        return loc.getBlockX() + " " + loc.getBlockY() + " " + loc.getBlockZ();
+                    }
+                }
+            }
+            
             return "NONE";
         }
 

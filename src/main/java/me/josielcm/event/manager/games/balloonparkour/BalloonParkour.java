@@ -55,9 +55,9 @@ public class BalloonParkour {
     @Setter
     private String title = "Balloon Parkour";
 
-    // @Getter
-    // @Setter
-    // private Title titleMsg;
+    @Getter
+    @Setter
+    private Title titleMsg;
 
     @Getter
     @Setter
@@ -83,7 +83,7 @@ public class BalloonParkour {
         BalloonParkourEvents eventListener = new BalloonParkourEvents();
         this.listener = eventListener;
 
-        // titleMsg = Title.title(Color.parse(title), Color.parse("<gold>¡Completa el parkour!"));
+        titleMsg = Title.title(Color.parse(title), Color.parse("<gold>¡Completa el parkour!"));
 
         Bukkit.getPluginManager().registerEvents(listener, Cl3vent.getInstance());
 
@@ -100,7 +100,7 @@ public class BalloonParkour {
                 players.put(playerId, -1);
                 visibility.put(playerId, true);
                 p.setGameMode(org.bukkit.GameMode.ADVENTURE);
-                // p.showTitle(titleMsg);
+                p.showTitle(titleMsg);
                 p.getInventory().clear();
                 p.teleport(spawn);
             } else {
