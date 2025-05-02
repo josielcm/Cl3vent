@@ -11,7 +11,6 @@ import org.bukkit.scheduler.BukkitTask;
 
 import lombok.Getter;
 import me.josielcm.event.Cl3vent;
-import me.josielcm.event.api.formats.Color;
 import me.josielcm.event.api.items.ItemBuilder;
 
 public class BalloonArmorModel {
@@ -139,17 +138,16 @@ public class BalloonArmorModel {
         removeArmorStand();
 
         armorStand = (ArmorStand) location.getWorld().spawn(location, ArmorStand.class);
-        armorStand.setVisible(true);
+        armorStand.setVisible(false);
         armorStand.setGravity(false);
-        armorStand.setCustomNameVisible(true);
+        armorStand.setCustomNameVisible(false);
         armorStand.setBasePlate(false);
-        armorStand.customName(Color.parse("<gold>Balloon"));
         armorStand.setGlowing(true);
 
         ItemStack balloon = ItemBuilder.builder()
-                .material(Material.LEATHER_CHESTPLATE)
+                .material(Material.LEATHER_HELMET)
                 .displayName("<gold>BALLOON")
-                .customModelData(1)
+                .customModelData(10000)
                 .build();
 
         armorStand.getEquipment().setHelmet(balloon);
