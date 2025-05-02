@@ -144,6 +144,7 @@ public class BalloonArmorModel {
         armorStand.setCustomNameVisible(true);
         armorStand.setBasePlate(false);
         armorStand.customName(Color.parse("<gold>Balloon"));
+        armorStand.setGlowing(true);
 
         ItemStack balloon = ItemBuilder.builder()
                 .material(Material.LEATHER_CHESTPLATE)

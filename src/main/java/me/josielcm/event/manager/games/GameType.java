@@ -4,8 +4,6 @@ public enum GameType {
     CAKEFEVER,
     BALLOONPARKOUR,
     GIANTGIFT,
-    INTERVIEW,
     BALLONSHOOTING,
-    LASTGUESTSTANDING,
     NONE
 }

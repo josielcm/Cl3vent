@@ -363,6 +363,7 @@ public class GiantGift {
 
                     return;
                 }
+                
 
                 if (gift.add(uuid, loc)) {
                     Player p = Bukkit.getPlayer(uuid);
@@ -370,6 +371,9 @@ public class GiantGift {
                     if (p != null) {
                         p.setGameMode(org.bukkit.GameMode.SPECTATOR);
                         p.sendRichMessage("<gold><b>¡Entraste al regalo a tiempo!");
+                        p.playSound(p.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
+
+                        Cl3vent.getInstance().getEventManager().sendActionBar("<green><b>¡" + p.getName() + " se salvo!");
                     }
                 } else {
                     if (gift.isFull()) {

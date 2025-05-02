@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 import me.josielcm.event.api.Key;
 import me.josielcm.event.api.logs.Log;
+import me.josielcm.event.api.papi.PAPIExtension;
 import me.josielcm.event.commands.EventCommand;
 import me.josielcm.event.commands.subscommands.Reload;
 import me.josielcm.event.manager.EventManager;
@@ -41,6 +42,8 @@ public final class Cl3vent extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        new PAPIExtension().register();
+
         Key.instanceKeys();
         FileManager.loadFiles();
         FileManager.debug();
