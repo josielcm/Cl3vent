@@ -168,11 +168,11 @@ public class BalloonArmorModel {
         armorStand.setBasePlate(false);
         armorStand.setGlowing(true);
         
-        ItemStack balloonTextured = new ItemStack(Material.LEATHER_HELMET);
+        ItemStack balloonTextured = new ItemStack(Material.LEATHER_HORSE_ARMOR);
         LeatherArmorMeta meta = (LeatherArmorMeta) balloonTextured.getItemMeta();
 
         if (meta != null) {
-            meta.setCustomModelData(369);
+            meta.setCustomModelData(10002);
 
             List<Color> colors = new ArrayList<>();
 
@@ -187,7 +187,7 @@ public class BalloonArmorModel {
 
             Color randomColor = colors.get(ThreadLocalRandom.current().nextInt(colors.size()));
 
-            if (randomColor == Color.fromRGB(255, 215, 0)) {
+            if (randomColor.asRGB() == Color.fromRGB(255, 215, 0).asRGB()) {
                 isGold = true;
             }
 

@@ -1,5 +1,6 @@
 package me.josielcm.event.manager.games.balloonshooting;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -27,6 +28,7 @@ import me.josielcm.event.api.formats.Format;
 import me.josielcm.event.api.items.ItemBuilder;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.title.Title;
+import net.kyori.adventure.title.Title.Times;
 
 public class BalloonShooting {
 
@@ -273,11 +275,23 @@ public class BalloonShooting {
         
         if (isGold(armorStand)) {
             points.merge(player, 2, Integer::sum);
-            p.sendRichMessage("<gold>¡Punto doble! +2 puntos");
+
+            Times times = Times.times(
+                    Duration.ofSeconds(1),
+                    Duration.ofSeconds(1),
+                    Duration.ofSeconds(1));
+
+            Title title = Title.title(
+                    Color.parse("<gold<b>¡Punto doble!"),
+                    Color.parse("<gold>+2"),
+                    times);
+
+            p.showTitle(title);
             p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, 1, 1);
         } else {
             points.merge(player, 1, Integer::sum);
-            p.sendRichMessage("<aqua>¡+1 punto!");
+            
+            p.sendActionBar(Color.parse("<aqua>+1"));
             p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, 1, 1);
         }
     }
