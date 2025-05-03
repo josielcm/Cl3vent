@@ -261,10 +261,24 @@ public class BalloonShooting {
     }
 
     public void addPoint(UUID player, ArmorStand armorStand) {
+        if (player == null || armorStand == null) {
+            return;
+        }
+
+        Player p = Bukkit.getPlayer(player);
+
+        if (p == null) {
+            return;
+        }
+        
         if (isGold(armorStand)) {
             points.merge(player, 2, Integer::sum);
+            p.sendRichMessage("<gold>¡Punto doble! +2 puntos");
+            p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, 1, 1);
         } else {
             points.merge(player, 1, Integer::sum);
+            p.sendRichMessage("<aqua>¡+1 punto!");
+            p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, 1, 1);
         }
     }
 

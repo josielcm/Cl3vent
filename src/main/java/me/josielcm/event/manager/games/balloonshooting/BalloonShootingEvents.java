@@ -1,6 +1,5 @@
 package me.josielcm.event.manager.games.balloonshooting;
 
-import org.bukkit.Sound;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
@@ -33,8 +32,6 @@ public class BalloonShootingEvents implements Listener {
         if (balloonShooting.isBalloon(armorStand)) {
             balloonShooting.addPoint(player.getUniqueId(), armorStand);
             balloonShooting.removeBalloon(armorStand);
-            player.sendMessage("§a+1");
-            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, 1, 1);
         }
     }
 

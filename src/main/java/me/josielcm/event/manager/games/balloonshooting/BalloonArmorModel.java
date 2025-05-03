@@ -14,6 +14,7 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.scheduler.BukkitTask;
 
 import lombok.Getter;
+import lombok.Setter;
 import me.josielcm.event.Cl3vent;
 
 public class BalloonArmorModel {
@@ -36,6 +37,10 @@ public class BalloonArmorModel {
     @Getter
     private boolean isGold = false;
 
+    @Getter
+    @Setter
+    private double step = 0.02;
+
     public BalloonArmorModel(Location pos1, Location pos2) {
         if (pos1 == null || pos2 == null) {
             throw new IllegalArgumentException("Positions cannot be null");
@@ -51,9 +56,22 @@ public class BalloonArmorModel {
     }
 
     public void startTask() {
+        if (task != null) {
+            task.cancel();
+            task = null;
+        }
+
+        if (armorStand == null || armorStand.isDead()) {
+            removeArmorStand();
+            return;
+        }
+
+        if (isGold) {
+            step = 0.06;
+        }
+
         task = Bukkit.getScheduler().runTaskTimer(Cl3vent.getInstance(), new Runnable() {
             private Location targetLocation = getRandomLocationInside();
-            private double step = 0.02;
             private double progress = 0.0;
             private int movementCounter = 0;
 
