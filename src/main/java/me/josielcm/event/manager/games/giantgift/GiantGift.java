@@ -87,7 +87,7 @@ public class GiantGift {
         Cl3vent plugin = Cl3vent.getInstance();
         EventManager eventManager = plugin.getEventManager();
 
-        titleMsg = Title.title(Color.parse(title), Color.parse("<gradient:#14ffr8:96ffbd>¡No te quedes afuera!"));
+        titleMsg = Title.title(Color.parse(title), Color.parse("<gradient:#14ffr8:#96ffbd>¡No te quedes afuera!"));
 
         plugin.getServer().getPluginManager().registerEvents(listener, plugin);
 
@@ -117,7 +117,7 @@ public class GiantGift {
         AtomicInteger time = new AtomicInteger(15);
 
         bossBar = BossBar.bossBar(
-                Color.parse("<gradient:#14ffr8:96ffbd><b>¡Iniciando en <gold>" + Format.formatTime(time.get()) + "</gold>!"),
+                Color.parse("<gradient:#14ffr8:#96ffbd><b>¡Iniciando en <gold>" + Format.formatTime(time.get()) + "</gold>!"),
                 0.0f,
                 BossBar.Color.YELLOW,
                 BossBar.Overlay.PROGRESS);
@@ -137,7 +137,7 @@ public class GiantGift {
                 return;
             }
 
-            bossBar.name(Color.parse("<gradient:#14ffr8:96ffbd><b>¡Iniciando en <gold>" + Format.formatTime(currentTime) + "</gold>!"));
+            bossBar.name(Color.parse("<gradient:#14ffr8:#96ffbd><b>¡Iniciando en <gold>" + Format.formatTime(currentTime) + "</gold>!"));
 
         }, 0L, 20L);
     
@@ -152,22 +152,18 @@ public class GiantGift {
 
         AtomicInteger time = new AtomicInteger(60);
 
-        bossBar = BossBar.bossBar(
-                Color.parse("<gradient:#14ffr8:96ffbd><b>" + Format.formatTime(time.get())),
-                0.0f,
-                BossBar.Color.YELLOW,
-                BossBar.Overlay.PROGRESS);
+        bossBar.name(Color.parse("<gradient:#14ffr8:#96ffbd><b>" + Format.formatTime(time.get())));
 
         for (UUID playerId : Cl3vent.getInstance().getEventManager().getAllPlayers()) {
             Player p = Bukkit.getPlayer(playerId);
             if (p != null) {
-                p.hideBossBar(bossBar);
-                p.showBossBar(bossBar);
+                p.teleport(spawn);
+                p.playSound(p.getLocation(), "ambient.bigregalo", 0.5f, 1.0f);
             }
         }
 
-        Cl3vent.getInstance().getEventManager().showTitle("<aqua><b>Ronda " + round, "<gradient:#14ffr8:96ffbd><b>¡No te quedes fuera!", 1, 2, 1);
-        Cl3vent.getInstance().getEventManager().sendActionBar("<gradient:#ff510d:ffc800><b>¡Muevete!");
+        Cl3vent.getInstance().getEventManager().showTitle("<aqua><b>Ronda " + round, "<gradient:#14ffr8:#96ffbd><b>¡No te quedes fuera!", 1, 2, 1);
+        Cl3vent.getInstance().getEventManager().sendActionBar("<gradient:#ff510d:#ffc800><b>¡Muevete!");
         Cl3vent.getInstance().getEventManager().playSound(Sound.ENTITY_PLAYER_LEVELUP);
 
         task = Bukkit.getScheduler().runTaskTimer(Cl3vent.getInstance(), () -> {
@@ -178,7 +174,7 @@ public class GiantGift {
             }
 
             if (checkIfAllGiftsAreFull()) {
-                Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffr8:96ffbd>¡Opps!", "<gradient:#14ffr8:96ffbd>Se han llenado todos los regalos", 1, 2, 1);
+                Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffr8:#96ffbd>¡Opps!", "<gradient:#14ffr8:#96ffbd>Se han llenado todos los regalos", 1, 2, 1);
                 startNextRound();
                 return;
             }
@@ -189,11 +185,12 @@ public class GiantGift {
             }
 
             if (currentTime == 40) {
-                Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffr8:96ffbd><b>¡Corre!", "<gradient:#14ffr8:96ffbd><b>Encuentra espacio en un regalo", 1, 2, 1);
+                Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffr8:#96ffbd><b>¡Corre!", "<gradient:#14ffr8:#96ffbd><b>Encuentra espacio en un regalo", 1, 2, 1);
+                stopSounds();
                 available = true;
             }
 
-            bossBar.name(Color.parse("<gradient:#14ffr8:96ffbd><b>" + Format.formatTime(currentTime)));
+            bossBar.name(Color.parse("<gradient:#14ffr8:#96ffbd><b>" + Format.formatTime(currentTime)));
 
         }, 0L, 20L);
 
@@ -226,16 +223,17 @@ public class GiantGift {
             return;
         }
 
-        for (UUID playerId : players) {
+        for (UUID playerId : Cl3vent.getInstance().getEventManager().getAllPlayers()) {
             Player p = Bukkit.getPlayer(playerId);
             if (p != null) {
                 p.teleport(spawn);
                 p.setGameMode(org.bukkit.GameMode.ADVENTURE);
+                p.stopAllSounds();
             }
         }
 
         AtomicInteger coundown = new AtomicInteger(15);
-        bossBar.name(Color.parse("<gradient:#ff510d:ffc800><b>¡Preparando la próxima ronda!"));
+        bossBar.name(Color.parse("<gradient:#ff510d:#ffc800><b>¡Preparando la próxima ronda!"));
 
         task = Bukkit.getScheduler().runTaskTimer(Cl3vent.getInstance(), () -> {
             int currentTime = coundown.getAndDecrement();
@@ -244,7 +242,7 @@ public class GiantGift {
                 return;
             }
 
-            Cl3vent.getInstance().getEventManager().sendActionBar("<gold><b>" + Format.formatTime(currentTime));
+            bossBar.name(Color.parse("<gradient:#ff510d:#ffc800><b>¡Preparando la próxima ronda!"));
         }, 0L, 20L);
 
     }
@@ -258,9 +256,17 @@ public class GiantGift {
         AtomicInteger time = new AtomicInteger(60);
         generateCapacities();
 
-        Cl3vent.getInstance().getEventManager().showTitle("<aqua><b>Ronda " + round, "<gradient:#14ffr8:96ffbd><b>¡No te quedes fuera!", 1, 2, 1);
-        Cl3vent.getInstance().getEventManager().sendActionBar("<gradient:#ff510d:ffc800><b>¡Muevete!");
+        Cl3vent.getInstance().getEventManager().showTitle("<aqua><b>Ronda " + round, "<gradient:#14ffr8:#96ffbd><b>¡No te quedes fuera!", 1, 2, 1);
+        Cl3vent.getInstance().getEventManager().sendActionBar("<gradient:#ff510d:#ffc800><b>¡Muevete!");
         Cl3vent.getInstance().getEventManager().playSound(Sound.ENTITY_PLAYER_LEVELUP);
+
+        for (UUID playerId : Cl3vent.getInstance().getEventManager().getAllPlayers()) {
+            Player p = Bukkit.getPlayer(playerId);
+            if (p != null) {
+                p.teleport(spawn);
+                p.playSound(p.getLocation(), "ambient.bigregalo", 0.5f, 1.0f);
+            }
+        }
 
         task = Bukkit.getScheduler().runTaskTimer(Cl3vent.getInstance(), () -> {
             int currentTime = time.getAndDecrement();
@@ -270,7 +276,7 @@ public class GiantGift {
             }
 
             if (checkIfAllGiftsAreFull()) {
-                Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffr8:96ffbd>¡Opps!", "<gradient:#14ffr8:96ffbd>Se han llenado todos los regalos", 1, 2, 1);
+                Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffr8:#96ffbd>¡Opps!", "<gradient:#14ffr8:#96ffbd>Se han llenado todos los regalos", 1, 2, 1);
                 startNextRound();
                 return;
             }
@@ -281,13 +287,23 @@ public class GiantGift {
             }
 
             if (currentTime == 40) {
-                Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffr8:96ffbd><b>¡Corre!", "<gradient:#14ffr8:96ffbd><b>Encuentra espacio en un regalo", 1, 2, 1);
+                Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffr8:#96ffbd><b>¡Corre!", "<gradient:#14ffr8:#96ffbd><b>Encuentra espacio en un regalo", 1, 2, 1);
+                stopSounds();
                 available = true;
             }
 
             bossBar.name(Color.parse("<gold><b>" + Format.formatTime(currentTime)));
 
         }, 0L, 20L);
+    }
+
+    private void stopSounds() {
+        for (UUID playerId : Cl3vent.getInstance().getEventManager().getAllPlayers()) {
+            Player p = Bukkit.getPlayer(playerId);
+            if (p != null) {
+                p.stopAllSounds();
+            }
+        }
     }
 
     public void end() {
@@ -300,6 +316,7 @@ public class GiantGift {
             if (p != null) {
                 p.hideBossBar(bossBar);
                 p.teleport(Cl3vent.getInstance().getEventManager().getSpawn());
+                p.stopAllSounds();
             }
         }
 
@@ -437,7 +454,7 @@ public class GiantGift {
                 if (gift.isFull()) {
                     Player p = Bukkit.getPlayer(uuid);
                     if (p != null) {
-                        p.sendRichMessage("<red><b>¡El regalo está lleno busca otro!");
+                        p.sendRichMessage("<red>¡El regalo está lleno busca otro!");
                     }
 
                     return;
@@ -449,16 +466,16 @@ public class GiantGift {
 
                     if (p != null) {
                         p.setGameMode(org.bukkit.GameMode.SPECTATOR);
-                        p.sendRichMessage("<gold><b>¡Entraste al regalo a tiempo!");
+                        p.sendRichMessage("<gradient:#14ffr8:#96ffbd>¡Entraste al regalo a tiempo!");
                         p.playSound(p.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
 
-                        Cl3vent.getInstance().getEventManager().sendActionBar("<green><b>¡" + p.getName() + " se salvo!");
+                        Cl3vent.getInstance().getEventManager().sendActionBar("<gradient:#14ffr8:#96ffbd>¡" + p.getName() + " se salvo!");
                     }
                 } else {
                     if (gift.isFull()) {
                         Player p = Bukkit.getPlayer(uuid);
                         if (p != null) {
-                            p.sendRichMessage("<red><b>¡El regalo está lleno busca otro!");
+                            p.sendRichMessage("<red>¡El regalo está lleno busca otro!");
                         }
                     }
                 }
