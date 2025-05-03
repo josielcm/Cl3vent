@@ -67,6 +67,7 @@ public class BalloonParkourEvents implements Listener {
                 }
 
                 player.getInventory().clear();
+                player.setGameMode(org.bukkit.GameMode.SPECTATOR);
             }
             return;
         }

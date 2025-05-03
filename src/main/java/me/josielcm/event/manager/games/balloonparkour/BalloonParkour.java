@@ -200,12 +200,13 @@ public class BalloonParkour {
 
             if (p != null) {
                 p.hideBossBar(bossBar);
+                p.teleport(Cl3vent.getInstance().getEventManager().getSpawn());
+                p.stopAllSounds();
+
                 if (!p.hasPermission("cl3vent.bypass")) {
                     p.getInventory().clear();
+                    p.setGameMode(org.bukkit.GameMode.ADVENTURE);
                 }
-                p.teleport(Cl3vent.getInstance().getEventManager().getSpawn());
-
-                p.stopAllSounds();
             } else {
                 Cl3vent.getInstance().getEventManager().eliminatePlayer(player);
             }
