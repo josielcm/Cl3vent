@@ -67,7 +67,7 @@ public class BalloonArmorModel {
         }
 
         if (isGold) {
-            step = 0.06;
+            step = 0.05;
         }
 
         task = Bukkit.getScheduler().runTaskTimer(Cl3vent.getInstance(), new Runnable() {

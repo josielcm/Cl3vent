@@ -8,6 +8,7 @@ import co.aikar.commands.BaseCommand;
 import co.aikar.commands.CommandHelp;
 import co.aikar.commands.annotation.CatchUnknown;
 import co.aikar.commands.annotation.CommandAlias;
+import co.aikar.commands.annotation.CommandCompletion;
 import co.aikar.commands.annotation.CommandPermission;
 import co.aikar.commands.annotation.HelpCommand;
 import co.aikar.commands.annotation.Subcommand;
@@ -20,6 +21,7 @@ public class EventCommand extends BaseCommand {
 
     @Subcommand("start")
     @CommandPermission("cl3vent.command")
+    @CommandCompletion("cakefever parkour bs gift")
     public void onStart(CommandSender sender, String gameType) {
         if (gameType.equalsIgnoreCase("cakefever")) {
             Cl3vent.getInstance().getEventManager().startGame(GameType.CAKEFEVER);
@@ -44,6 +46,7 @@ public class EventCommand extends BaseCommand {
 
     @Subcommand("revive")
     @CommandPermission("cl3vent.command")
+    @CommandCompletion("@players")
     public void onRevive(CommandSender sender, String playerName) {
         Player player = Bukkit.getPlayer(playerName);
 
@@ -73,9 +76,27 @@ public class EventCommand extends BaseCommand {
         Cl3vent.getInstance().getEventManager().stopGame();
     }
 
+    @Subcommand("kill")
+    @CommandPermission("cl3vent.command")
+    @CommandCompletion("@players")
+    public void onKill(CommandSender sender, String nickname) {
+        Player player = Bukkit.getPlayer(nickname);
+
+        if (player != null) {
+            if (!Cl3vent.getInstance().getEventManager().getPlayers().contains(player.getUniqueId())) {
+                sender.sendMessage(Color.parse("<red>Player is already dead!"));
+                return;
+            }
+
+            Cl3vent.getInstance().getEventManager().eliminatePlayer(player.getUniqueId());
+        } else {
+            sender.sendMessage(Color.parse("<red>Player not found!"));
+        }
+    }
+
     @CatchUnknown
     public void onUnknownCommand(CommandSender sender) {
-        sender.sendMessage(Color.parse("<yellow><bold>Base</bold> <gray>v1.0</gray> <yellow>by JosielCM</yellow>"));
+        sender.sendMessage(Color.parse("<aqua><bold>Cl3vent</bold> <gray>v1.0</gray> <aqua>by JosielCM</aqua>"));
     }
 
     @HelpCommand

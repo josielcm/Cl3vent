@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
@@ -71,8 +72,8 @@ public class CakeFever {
     public void prepare() {
         CakeFeverEvent eventListener = new CakeFeverEvent();
         this.listener = eventListener;
-        
-        titleMsg = Title.title(Color.parse(title), Color.parse("<gold>¡Encuentra los pasteles!"));
+
+        titleMsg = Title.title(Color.parse(title), Color.parse("<gradient:#14ffr8:96ffbd>¡Encuentra los pasteles!"));
 
         Cl3vent.getInstance().getServer().getPluginManager().registerEvents(listener, Cl3vent.getInstance());
 
@@ -103,15 +104,10 @@ public class CakeFever {
             }
         });
 
-        start();
-    }
-
-    private void start() {
-        final Cl3vent plugin = Cl3vent.getInstance();
-        final AtomicInteger time = new AtomicInteger(60);
+        AtomicInteger time = new AtomicInteger(15);
 
         bossBar = BossBar.bossBar(
-                Color.parse("<gold><b>" + Format.formatTime(time.get())),
+                Color.parse("<gradient:#14ffr8:96ffbd><b>¡Iniciando en <gold>" + Format.formatTime(time.get()) + "</gold>!"),
                 0.0f,
                 BossBar.Color.YELLOW,
                 BossBar.Overlay.PROGRESS);
@@ -126,14 +122,51 @@ public class CakeFever {
         task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
             int currentTime = time.getAndDecrement();
             if (currentTime <= 0) {
+                start();
+                return;
+            }
+
+            bossBar.name(Color.parse("<gradient:#14ffr8:96ffbd><b>¡Iniciando en <gold>" + Format.formatTime(currentTime) + "</gold>!"));
+        }, 0L, 20L);
+
+    }
+
+    private void start() {
+        if (task != null) {
+            task.cancel();
+            task = null;
+        }
+
+        final Cl3vent plugin = Cl3vent.getInstance();
+        final AtomicInteger time = new AtomicInteger(60);
+
+        bossBar = BossBar.bossBar(
+                Color.parse("<gradient:#14ffr8:96ffbd><b>" + Format.formatTime(time.get())),
+                0.0f,
+                BossBar.Color.YELLOW,
+                BossBar.Overlay.PROGRESS);
+
+        for (UUID playerId : plugin.getEventManager().getAllPlayers()) {
+            Player p = Bukkit.getPlayer(playerId);
+            if (p != null) {
+                p.hideBossBar(bossBar);
+                p.showBossBar(bossBar);
+            }
+        }
+
+        task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            int currentTime = time.getAndDecrement();
+            if (currentTime <= 0) {
                 stop();
                 return;
             }
 
-            bossBar.name(Color.parse("<gold><b>" + Format.formatTime(currentTime)));
+            bossBar.name(Color.parse("<gradient:#14ffr8:96ffbd><b>" + Format.formatTime(currentTime)));
 
-            if (currentTime % 30 == 0) {
+            if (currentTime % 10 == 0) {
                 Bukkit.getScheduler().runTaskLater(plugin, this::regenerateCakes, 1L);
+                Cl3vent.getInstance().getEventManager().sendMessage("<gradient:#14ffr8:96ffbd>¡Los pasteles han sido regenerados!");
+                Cl3vent.getInstance().getEventManager().playSound(Sound.BLOCK_NOTE_BLOCK_BELL);
             }
         }, 0L, 20L);
     }
@@ -147,8 +180,14 @@ public class CakeFever {
             Player p = Bukkit.getPlayer(playerId);
             if (p != null) {
                 p.hideBossBar(bossBar);
+                p.teleport(Cl3vent.getInstance().getEventManager().getSpawn());
+            } else {
+                Cl3vent.getInstance().getEventManager().eliminatePlayer(playerId);
             }
         }
+
+        Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffr8:96ffbd>¡Juego terminado!", "", 1, 3, 1);
+        Cl3vent.getInstance().getEventManager().playSound(Sound.BLOCK_NOTE_BLOCK_IMITATE_ENDER_DRAGON);
 
         removeCakes();
 
@@ -184,18 +223,22 @@ public class CakeFever {
 
         if (isCake) {
             points.compute(playerId, (k, v) -> v == null ? 1 : v + 1);
-            player.sendRichMessage("<aqua>+1</aqua>");
+            player.sendActionBar(Color.parse("<gradient:#14ffr8:96ffbd>¡+1 punto!"));
         } else {
+            final int reducedPoints = RandomUtils.randomInt(1, 2);
             points.compute(playerId, (k, v) -> {
                 if (v == null)
                     return 0;
-                int reducedPoints = RandomUtils.randomInt(1, 3);
                 return Math.max(0, v - reducedPoints);
             });
-            player.sendRichMessage("<red>-" + RandomUtils.randomInt(1, 2) + "</red>");
+            if (reducedPoints == 1) {
+                player.sendActionBar(Color.parse("<red>¡-1 punto!"));
+            } else {
+                player.sendActionBar(Color.parse("<red>¡-2 puntos!"));
+            }
         }
 
-        player.sendRichMessage("<gray>Points: " + points.get(playerId) + "</gray>");
+        player.sendRichMessage("<gradient:#14ffr8:96ffbd>Puntos: " + points.get(playerId));
     }
 
     public void regenerateCakes() {

@@ -305,7 +305,7 @@ public class EventManager {
         Player p = Bukkit.getPlayer(player);
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(player);
 
-        sendMessage("<aqua>" + offlinePlayer.getName() + " <red>eliminado!");
+        sendMessage("<gradient:#ff0004:#ffb730:#ff2200>" + offlinePlayer.getName() + " eliminado!</gradient>");
         playSound(Sound.ENTITY_WARDEN_STEP);
 
         players.remove(player);
@@ -345,11 +345,12 @@ public class EventManager {
         Player p = Bukkit.getPlayer(player);
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(player);
 
-        sendMessage("<aqua>" + offlinePlayer.getName() + " revivido!");
+        sendMessage("<gradient:#00e1ff:#a3a5ff>" + offlinePlayer.getName() + " ha sido revivido!");
         playSound(Sound.ENTITY_WARDEN_STEP);
 
         if (p != null) {
             p.setGameMode(org.bukkit.GameMode.ADVENTURE);
+            p.getInventory().clear();
             p.teleport(spawn);
         }
 
@@ -358,7 +359,7 @@ public class EventManager {
     public void sendActionBar(String message) {
         Component parsedMessage = Color.parse(message);
 
-        for (UUID playerId : players) {
+        for (UUID playerId : allPlayers) {
             Player p = Bukkit.getPlayer(playerId);
             if (p != null) {
                 p.sendActionBar(parsedMessage);
@@ -369,7 +370,7 @@ public class EventManager {
     public void sendMessage(String message) {
         Component parsedMessage = Color.parse(message);
 
-        for (UUID playerId : players) {
+        for (UUID playerId : allPlayers) {
             Player p = Bukkit.getPlayer(playerId);
             if (p != null) {
                 p.sendMessage(parsedMessage);
@@ -386,7 +387,7 @@ public class EventManager {
                 Duration.ofSeconds(fadeOut));
         Title titleObj = Title.title(parsedTitle, parsedSubtitle, times);
 
-        for (UUID playerId : players) {
+        for (UUID playerId : allPlayers) {
             Player p = Bukkit.getPlayer(playerId);
             if (p != null) {
                 p.showTitle(titleObj);
@@ -395,7 +396,7 @@ public class EventManager {
     }
 
     public void playSound(Sound sound) {
-        players.forEach(player -> {
+        allPlayers.forEach(player -> {
             Player p = Bukkit.getPlayer(player);
 
             if (p != null) {

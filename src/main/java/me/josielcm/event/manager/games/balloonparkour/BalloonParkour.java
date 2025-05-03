@@ -83,7 +83,7 @@ public class BalloonParkour {
         BalloonParkourEvents eventListener = new BalloonParkourEvents();
         this.listener = eventListener;
 
-        titleMsg = Title.title(Color.parse(title), Color.parse("<gold>¡Completa el parkour!"));
+        titleMsg = Title.title(Color.parse(title), Color.parse("<gradient:#14ffr8:96ffbd><b>¡Completa el parkour!"));
 
         Bukkit.getPluginManager().registerEvents(listener, Cl3vent.getInstance());
 
@@ -108,7 +108,32 @@ public class BalloonParkour {
             }
         }
 
-        start();
+        AtomicInteger time = new AtomicInteger(15);
+
+        bossBar = BossBar.bossBar(
+                Color.parse("<gradient:#14ffr8:96ffbd><b>¡Iniciando en <gold>" + Format.formatTime(time.get()) + "</gold>!"),
+                0.0f,
+                BossBar.Color.YELLOW,
+                BossBar.Overlay.PROGRESS);
+
+        plugin.getEventManager().getAllPlayers().forEach(playerId -> {
+            Player p = Bukkit.getPlayer(playerId);
+            if (p != null) {
+                p.showBossBar(bossBar);
+            }
+        });
+
+        task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            int currentTime = time.getAndDecrement();
+            if (currentTime <= 0) {
+                start();
+                return;
+            }
+
+            bossBar.name(Color.parse("<gradient:#14ffr8:96ffbd><b>¡Iniciando en <gold>" + Format.formatTime(currentTime) + "</gold>!"));
+
+        }, 0L, 20L);
+        
     }
 
     public void start() {
@@ -122,8 +147,11 @@ public class BalloonParkour {
         final Cl3vent plugin = Cl3vent.getInstance();
         final AtomicInteger time = new AtomicInteger(60);
 
+        Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffr8:96ffbd>¡El juego ha comenzado!", "", 1, 2, 1);
+        Cl3vent.getInstance().getEventManager().playSound(Sound.ENTITY_PLAYER_LEVELUP);
+
         bossBar = BossBar.bossBar(
-                Color.parse("<gold><b>" + Format.formatTime(time.get())),
+                Color.parse("<gradient:#14ffr8:96ffbd><b>" + Format.formatTime(time.get())),
                 0.0f,
                 BossBar.Color.YELLOW,
                 BossBar.Overlay.PROGRESS);
@@ -131,7 +159,9 @@ public class BalloonParkour {
         for (UUID playerId : plugin.getEventManager().getAllPlayers()) {
             Player p = Bukkit.getPlayer(playerId);
             if (p != null) {
+                p.hideBossBar(bossBar);
                 p.showBossBar(bossBar);
+                p.teleport(spawn);
             }
         }
 
@@ -142,7 +172,7 @@ public class BalloonParkour {
                 return;
             }
 
-            bossBar.name(Color.parse("<gold><b>" + Format.formatTime(currentTime)));
+            bossBar.name(Color.parse("<gradient:#14ffr8:96ffbd><b>" + Format.formatTime(currentTime)));
 
         }, 0L, 20L);
 
@@ -153,18 +183,21 @@ public class BalloonParkour {
             task.cancel();
         }
 
-        Cl3vent.getInstance().getEventManager().getPlayers().forEach(player -> {
+        Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffr8:96ffbd>¡Juego terminado!", "", 1, 2, 1);
+        Cl3vent.getInstance().getEventManager().playSound(Sound.ENTITY_PLAYER_LEVELUP);
+
+        Cl3vent.getInstance().getEventManager().getAllPlayers().forEach(player -> {
             Player p = Bukkit.getPlayer(player);
 
             if (p != null) {
                 p.hideBossBar(bossBar);
-
                 if (!p.hasPermission("cl3vent.bypass")) {
                     p.getInventory().clear();
-                    p.teleport(spawn);
+                    
                 }
+                p.teleport(Cl3vent.getInstance().getEventManager().getSpawn());
             } else {
-                Cl3vent.getInstance().getEventManager().getPlayers().remove(player);
+                Cl3vent.getInstance().getEventManager().eliminatePlayer(player);
             }
         });
 
@@ -186,24 +219,20 @@ public class BalloonParkour {
         }
 
         int currentCheckpoint = players.get(player.getUniqueId());
-        Cl3vent.getInstance().getLogger().info("Player " + player.getName() + " attempting checkpoint " + checkpoint +
-                " (current: " + currentCheckpoint + ")");
 
-        // Solo actualizar si es el siguiente checkpoint
         if (checkpoint == currentCheckpoint + 1) {
             players.put(player.getUniqueId(), checkpoint);
 
-            // Efectos y mensajes
-            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
-
             if (checkpoint == checkpoints.size() - 1) {
-                player.sendRichMessage("<green>¡Último checkpoint alcanzado! <gray>Busca la <gold>zona final<gray>.");
-            } else {
-                player.sendRichMessage("<green>Checkpoint " + checkpoint + " alcanzado! <gray>(" +
-                        checkpoint + "/" + (checkpoints.size() - 1) + ")");
+                player.sendRichMessage("<gradient:#14ffr8:96ffbd>¡Último checkpoint alcanzado ve a final!");
+                player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
+            } else { // <gradient:#14ffr8:96ffbd>¡
+                if (checkpoint != 0) {
+                    player.sendRichMessage("<gradient:#14ffr8:96ffbd>¡Checkpoint " + checkpoint + " alcanzado!</gradient> <gray>(<aqua>" +
+                    checkpoint + "</aqua>/<aqua>" + (checkpoints.size() - 1) + "</aqua>)");   
+                    player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
+                }
             }
-
-            Cl3vent.getInstance().getLogger().info("Player " + player.getName() + " reached checkpoint " + checkpoint);
         }
     }
 
@@ -254,11 +283,16 @@ public class BalloonParkour {
     }
 
     public void updatePlayerVisibility(Player player, boolean visible) {
+        if (player.hasCooldown(Material.ENDER_EYE)) {
+            player.sendRichMessage("<red>Debes esperar para volver a usarlo.");
+            return;
+        }
+
+        player.setCooldown(Material.ENDER_EYE, 20 * 3);
+
         visibility.put(player.getUniqueId(), visible);
 
-        // Schedule this as a delayed task to not block the main thread
         Bukkit.getScheduler().runTaskLater(Cl3vent.getInstance(), () -> {
-            // Process visibility changes in chunks to reduce lag spikes
             List<Player> activePlayers = new ArrayList<>();
             for (UUID uuid : Cl3vent.getInstance().getEventManager().getPlayers()) {
                 Player target = Bukkit.getPlayer(uuid);
@@ -283,7 +317,6 @@ public class BalloonParkour {
                 }, i / BATCH_SIZE);
             }
 
-            // Show message to player
             String message = visible ? "<grey>Visibilidad de los jugadores fue <green>activada<grey>."
                     : "<grey>Visibilidad de los jugadores fue <red>desactivada<grey>.";
             player.sendRichMessage(message);

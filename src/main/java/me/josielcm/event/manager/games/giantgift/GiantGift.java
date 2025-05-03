@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.title.Title;
@@ -71,7 +72,13 @@ public class GiantGift {
 
     @Getter
     @Setter
+    private boolean available = false;
+
+    @Getter
+    @Setter
     private Title titleMsg;
+
+    //<gradient:#14ffr8:96ffbd>¡
 
     public void prepare() {
         GiantGiftEvents listener = new GiantGiftEvents();
@@ -79,6 +86,8 @@ public class GiantGift {
 
         Cl3vent plugin = Cl3vent.getInstance();
         EventManager eventManager = plugin.getEventManager();
+
+        titleMsg = Title.title(Color.parse(title), Color.parse("<gradient:#14ffr8:96ffbd>¡No te quedes afuera!"));
 
         plugin.getServer().getPluginManager().registerEvents(listener, plugin);
 
@@ -89,13 +98,49 @@ public class GiantGift {
             Player p = Bukkit.getPlayer(player);
 
             if (p != null) {
-                p.teleport(spawn);
+                p.setGameMode(org.bukkit.GameMode.ADVENTURE);
+                p.getInventory().clear();
+            } else {
+                players.remove(player);
+                eventManager.getPlayers().remove(player);
             }
         });
 
-        generateCapacities();
+        eventManager.getAllPlayers().forEach(player -> {
+            Player p = Bukkit.getPlayer(player);
+            if (p != null) {
+                p.teleport(spawn);
+                p.showTitle(titleMsg);
+            }
+        });
 
-        start();
+        AtomicInteger time = new AtomicInteger(15);
+
+        bossBar = BossBar.bossBar(
+                Color.parse("<gradient:#14ffr8:96ffbd><b>¡Iniciando en <gold>" + Format.formatTime(time.get()) + "</gold>!"),
+                0.0f,
+                BossBar.Color.YELLOW,
+                BossBar.Overlay.PROGRESS);
+
+        for (UUID playerId : eventManager.getAllPlayers()) {
+            Player p = Bukkit.getPlayer(playerId);
+            if (p != null) {
+                p.hideBossBar(bossBar);
+                p.showBossBar(bossBar);
+            }
+        }
+
+        task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            int currentTime = time.getAndDecrement();
+            if (currentTime <= 0) {
+                start();
+                return;
+            }
+
+            bossBar.name(Color.parse("<gradient:#14ffr8:96ffbd><b>¡Iniciando en <gold>" + Format.formatTime(currentTime) + "</gold>!"));
+
+        }, 0L, 20L);
+    
     }
 
     public void start() {
@@ -103,10 +148,12 @@ public class GiantGift {
             task.cancel();
         }
 
+        generateCapacities();
+
         AtomicInteger time = new AtomicInteger(60);
 
         bossBar = BossBar.bossBar(
-                Color.parse("<gold><b>" + Format.formatTime(time.get())),
+                Color.parse("<gradient:#14ffr8:96ffbd><b>" + Format.formatTime(time.get())),
                 0.0f,
                 BossBar.Color.YELLOW,
                 BossBar.Overlay.PROGRESS);
@@ -114,11 +161,14 @@ public class GiantGift {
         for (UUID playerId : Cl3vent.getInstance().getEventManager().getAllPlayers()) {
             Player p = Bukkit.getPlayer(playerId);
             if (p != null) {
+                p.hideBossBar(bossBar);
                 p.showBossBar(bossBar);
             }
         }
 
-        
+        Cl3vent.getInstance().getEventManager().showTitle("<aqua><b>Ronda " + round, "<gradient:#14ffr8:96ffbd><b>¡No te quedes fuera!", 1, 2, 1);
+        Cl3vent.getInstance().getEventManager().sendActionBar("<gradient:#ff510d:ffc800><b>¡Muevete!");
+        Cl3vent.getInstance().getEventManager().playSound(Sound.ENTITY_PLAYER_LEVELUP);
 
         task = Bukkit.getScheduler().runTaskTimer(Cl3vent.getInstance(), () -> {
             int currentTime = time.getAndDecrement();
@@ -127,7 +177,24 @@ public class GiantGift {
                 return;
             }
 
-            bossBar.name(Color.parse("<gold><b>" + Format.formatTime(currentTime)));
+            if (checkIfAllGiftsAreFull()) {
+                Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffr8:96ffbd>¡Opps!", "<gradient:#14ffr8:96ffbd>Se han llenado todos los regalos", 1, 2, 1);
+                startNextRound();
+                return;
+            }
+
+            if (elimination >= limitElimination) {
+                end();
+                return;
+            }
+
+            if (currentTime == 40) {
+                Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffr8:96ffbd><b>¡Corre!", "<gradient:#14ffr8:96ffbd><b>Encuentra espacio en un regalo", 1, 2, 1);
+                available = true;
+            }
+
+            bossBar.name(Color.parse("<gradient:#14ffr8:96ffbd><b>" + Format.formatTime(currentTime)));
+
         }, 0L, 20L);
 
     }
@@ -154,7 +221,7 @@ public class GiantGift {
             return;
         }
 
-        if (Cl3vent.getInstance().getEventManager().getPlayers().size() < 1) { // =
+        if (Cl3vent.getInstance().getEventManager().getPlayers().size() <= 1) {
             end();
             return;
         }
@@ -168,7 +235,7 @@ public class GiantGift {
         }
 
         AtomicInteger coundown = new AtomicInteger(15);
-        bossBar.name(Color.parse("<gold><b>¡Preparando la próxima ronda!"));
+        bossBar.name(Color.parse("<gradient:#ff510d:ffc800><b>¡Preparando la próxima ronda!"));
 
         task = Bukkit.getScheduler().runTaskTimer(Cl3vent.getInstance(), () -> {
             int currentTime = coundown.getAndDecrement();
@@ -191,6 +258,10 @@ public class GiantGift {
         AtomicInteger time = new AtomicInteger(60);
         generateCapacities();
 
+        Cl3vent.getInstance().getEventManager().showTitle("<aqua><b>Ronda " + round, "<gradient:#14ffr8:96ffbd><b>¡No te quedes fuera!", 1, 2, 1);
+        Cl3vent.getInstance().getEventManager().sendActionBar("<gradient:#ff510d:ffc800><b>¡Muevete!");
+        Cl3vent.getInstance().getEventManager().playSound(Sound.ENTITY_PLAYER_LEVELUP);
+
         task = Bukkit.getScheduler().runTaskTimer(Cl3vent.getInstance(), () -> {
             int currentTime = time.getAndDecrement();
             if (currentTime <= 0) {
@@ -199,6 +270,7 @@ public class GiantGift {
             }
 
             if (checkIfAllGiftsAreFull()) {
+                Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffr8:96ffbd>¡Opps!", "<gradient:#14ffr8:96ffbd>Se han llenado todos los regalos", 1, 2, 1);
                 startNextRound();
                 return;
             }
@@ -206,6 +278,11 @@ public class GiantGift {
             if (elimination >= limitElimination) {
                 end();
                 return;
+            }
+
+            if (currentTime == 40) {
+                Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffr8:96ffbd><b>¡Corre!", "<gradient:#14ffr8:96ffbd><b>Encuentra espacio en un regalo", 1, 2, 1);
+                available = true;
             }
 
             bossBar.name(Color.parse("<gold><b>" + Format.formatTime(currentTime)));
@@ -222,6 +299,7 @@ public class GiantGift {
             Player p = Bukkit.getPlayer(playerId);
             if (p != null) {
                 p.hideBossBar(bossBar);
+                p.teleport(Cl3vent.getInstance().getEventManager().getSpawn());
             }
         }
 
