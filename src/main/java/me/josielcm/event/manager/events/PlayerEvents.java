@@ -14,8 +14,11 @@ public class PlayerEvents implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent ev) {
-        Cl3vent.getInstance().getEventManager().getPlayers().add(ev.getPlayer().getUniqueId());
         Cl3vent.getInstance().getEventManager().getAllPlayers().add(ev.getPlayer().getUniqueId());
+
+        if (!ev.getPlayer().hasPermission("cl3vent.bypass")) {
+            Cl3vent.getInstance().getEventManager().getPlayers().add(ev.getPlayer().getUniqueId());
+        }
 
         if (Cl3vent.getInstance().getEventManager().getSpawn() != null) {
             ev.getPlayer().teleport(Cl3vent.getInstance().getEventManager().getSpawn());

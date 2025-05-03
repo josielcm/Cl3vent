@@ -2,6 +2,7 @@ package me.josielcm.event.manager.games.cakefever;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -252,7 +253,12 @@ public class CakeFever {
             Bukkit.getScheduler().runTaskLater(Cl3vent.getInstance(), () -> {
                 int endIdx = Math.min(startIdx + BATCH_SIZE, cakes.size());
                 for (int j = startIdx; j < endIdx; j++) {
-                    cakes.get(j).getBlock().setType(org.bukkit.Material.CAKE);
+                    Random random = new Random();
+
+                    if (random.nextBoolean()) {
+                        cakes.get(j).getBlock().setType(org.bukkit.Material.CAKE);
+                    }
+
                 }
             }, i / BATCH_SIZE);
         }

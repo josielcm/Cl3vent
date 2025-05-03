@@ -36,7 +36,7 @@ public class BalloonParkourEvents implements Listener {
         UUID playerId = player.getUniqueId();
         BalloonParkour balloonParkour = getBalloonParkour();
 
-        if (player.getWorld() != balloonParkour.getWorld()) // player.hasPermission("cl3vent.bypass") ||
+        if (player.hasPermission("cl3vent.bypass") || player.getWorld() != balloonParkour.getWorld())
             return;
 
         Location to = ev.getTo();
@@ -87,8 +87,7 @@ public class BalloonParkourEvents implements Listener {
     public void onInteract(PlayerInteractEvent ev) {
         Player player = ev.getPlayer();
 
-        // Corregir la condición de acción
-        if (ev.getAction() != Action.RIGHT_CLICK_BLOCK && ev.getAction() != Action.RIGHT_CLICK_AIR) // player.hasPermission("cl3vent.bypass")
+        if (ev.getAction() != Action.RIGHT_CLICK_BLOCK && ev.getAction() != Action.RIGHT_CLICK_AIR || player.hasPermission("cl3vent.bypass")) // player.hasPermission("cl3vent.bypass")
                                                                                                     // ||
             return;
         if (ev.getItem() == null || !ev.getItem().hasItemMeta())

@@ -20,6 +20,12 @@ public class BalloonShootingEvents implements Listener {
             ev.getEntity().remove();
             return;
         }
+
+        if (ev.getHitEntity() instanceof Player) {
+            ev.setCancelled(true);
+            ev.getEntity().remove();
+            return;
+        }
         
         if (!(ev.getHitEntity() instanceof ArmorStand) || !(ev.getEntity().getShooter() instanceof Player)) return;
 

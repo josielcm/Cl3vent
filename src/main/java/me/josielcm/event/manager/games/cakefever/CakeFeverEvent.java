@@ -22,7 +22,7 @@ public class CakeFeverEvent implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onCake(PlayerInteractEvent ev) {
-        if (ev.getClickedBlock() == null || ev.getClickedBlock().getType() != Material.CAKE)
+        if (ev.getClickedBlock() == null || ev.getClickedBlock().getType() != Material.CAKE || ev.getPlayer().hasPermission("cl3vent.bypass"))
             return;
 
         if (!Cl3vent.getInstance().getEventManager().isInGame() ||

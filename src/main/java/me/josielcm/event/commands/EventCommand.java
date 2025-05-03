@@ -1,6 +1,7 @@
 package me.josielcm.event.commands;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -101,6 +102,18 @@ public class EventCommand extends BaseCommand {
         } else {
             sender.sendMessage(Color.parse("<red>Player not found!"));
         }
+    }
+
+    @Subcommand("happy")
+    @CommandPermission("cl3vent.command")
+    public void onHappy(CommandSender sender) {
+
+        Cl3vent.getInstance().getEventManager().showTitle("<gradient:#ff6f00:#ffc640:#ff5805>¡Feliz cumpleaños!", "C13ement", 1, 5, 1);
+        Cl3vent.getInstance().getEventManager().playSound(Sound.BLOCK_NOTE_BLOCK_BASS);
+        Cl3vent.getInstance().getEventManager().playSound(Sound.BLOCK_NOTE_BLOCK_BANJO);
+        Cl3vent.getInstance().getEventManager().playSound(Sound.BLOCK_NOTE_BLOCK_BIT);
+        Cl3vent.getInstance().getEventManager().playSound(Sound.BLOCK_NOTE_BLOCK_IMITATE_ENDER_DRAGON);
+
     }
 
     @CatchUnknown

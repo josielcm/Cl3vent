@@ -16,7 +16,7 @@ public class GiantGiftEvents implements Listener {
             return;
         }
 
-        if (ev.getPlayer().getGameMode() == org.bukkit.GameMode.SPECTATOR) { // || ev.getPlayer().hasPermission("cl3vent.bypass")
+        if (ev.getPlayer().getGameMode() == org.bukkit.GameMode.SPECTATOR || ev.getPlayer().hasPermission("cl3vent.bypass")) {
             return;
         }
 
