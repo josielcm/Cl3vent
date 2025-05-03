@@ -83,7 +83,7 @@ public class BalloonParkour {
         BalloonParkourEvents eventListener = new BalloonParkourEvents();
         this.listener = eventListener;
 
-        titleMsg = Title.title(Color.parse(title), Color.parse("<gradient:#14ffr8:#96ffbd><b>¡Completa el parkour!"));
+        titleMsg = Title.title(Color.parse(title), Color.parse("<gradient:#14ffe8:#96ffbd><b>¡Completa el parkour!"));
 
         Bukkit.getPluginManager().registerEvents(listener, Cl3vent.getInstance());
 
@@ -111,7 +111,7 @@ public class BalloonParkour {
         AtomicInteger time = new AtomicInteger(15);
 
         bossBar = BossBar.bossBar(
-                Color.parse("<gradient:#14ffr8:#96ffbd><b>¡Iniciando en <gold>" + Format.formatTime(time.get()) + "</gold>!"),
+                Color.parse("<gradient:#14ffe8:#96ffbd><b>¡Iniciando en <gold>" + Format.formatTime(time.get()) + "</gold>!"),
                 0.0f,
                 BossBar.Color.YELLOW,
                 BossBar.Overlay.PROGRESS);
@@ -130,7 +130,7 @@ public class BalloonParkour {
                 return;
             }
 
-            bossBar.name(Color.parse("<gradient:#14ffr8:#96ffbd><b>¡Iniciando en <gold>" + Format.formatTime(currentTime) + "</gold>!"));
+            bossBar.name(Color.parse("<gradient:#14ffe8:#96ffbd><b>¡Iniciando en <gold>" + Format.formatTime(currentTime) + "</gold>!"));
 
         }, 0L, 20L);
         
@@ -147,10 +147,10 @@ public class BalloonParkour {
         final Cl3vent plugin = Cl3vent.getInstance();
         final AtomicInteger time = new AtomicInteger(330);
 
-        Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffr8:#96ffbd>¡El juego ha comenzado!", "", 1, 2, 1);
+        Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffe8:#96ffbd>¡El juego ha comenzado!", "", 1, 2, 1);
         Cl3vent.getInstance().getEventManager().playSound(Sound.ENTITY_PLAYER_LEVELUP);
 
-        bossBar.name(Color.parse("<gradient:#14ffr8:#96ffbd><b>" + Format.formatTime(time.get())));
+        bossBar.name(Color.parse("<gradient:#14ffe8:#96ffbd><b>" + Format.formatTime(time.get())));
 
         for (UUID playerId : plugin.getEventManager().getAllPlayers()) {
             Player p = Bukkit.getPlayer(playerId);
@@ -167,7 +167,7 @@ public class BalloonParkour {
                 return;
             }
 
-            bossBar.name(Color.parse("<gradient:#14ffr8:#96ffbd><b>" + Format.formatTime(currentTime)));
+            bossBar.name(Color.parse("<gradient:#14ffe8:#96ffbd><b>" + Format.formatTime(currentTime)));
 
         }, 0L, 20L);
 
@@ -178,7 +178,7 @@ public class BalloonParkour {
             task.cancel();
         }
 
-        Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffr8:#96ffbd>¡Juego terminado!", "", 1, 2, 1);
+        Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffe8:#96ffbd>¡Juego terminado!", "", 1, 2, 1);
         Cl3vent.getInstance().getEventManager().playSound(Sound.ENTITY_PLAYER_LEVELUP);
 
         Cl3vent.getInstance().getEventManager().getAllPlayers().forEach(player -> {
@@ -220,11 +220,11 @@ public class BalloonParkour {
             players.put(player.getUniqueId(), checkpoint);
 
             if (checkpoint == checkpoints.size() - 1) {
-                player.sendRichMessage("<gradient:#14ffr8:#96ffbd>¡Último checkpoint alcanzado ve a final!");
+                player.sendRichMessage("<gradient:#14ffe8:#96ffbd>¡Último checkpoint alcanzado ve a final!");
                 player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
             } else { // <gradient:#14ffr8:96ffbd>¡
                 if (checkpoint != 0) {
-                    player.sendRichMessage("<gradient:#14ffr8:#96ffbd>¡Checkpoint " + checkpoint + " alcanzado!</gradient> <gray>(<aqua>" +
+                    player.sendRichMessage("<gradient:#14ffe8:#96ffbd>¡Checkpoint " + checkpoint + " alcanzado!</gradient> <gray>(<aqua>" +
                     checkpoint + "</aqua>/<aqua>" + (checkpoints.size() - 1) + "</aqua>)");   
                     player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
                 }

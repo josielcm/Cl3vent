@@ -87,7 +87,7 @@ public class GiantGift {
         Cl3vent plugin = Cl3vent.getInstance();
         EventManager eventManager = plugin.getEventManager();
 
-        titleMsg = Title.title(Color.parse(title), Color.parse("<gradient:#14ffr8:#96ffbd>¡No te quedes afuera!"));
+        titleMsg = Title.title(Color.parse(title), Color.parse("<gradient:#14ffe8:#96ffbd>¡No te quedes afuera!"));
 
         plugin.getServer().getPluginManager().registerEvents(listener, plugin);
 
@@ -117,7 +117,7 @@ public class GiantGift {
         AtomicInteger time = new AtomicInteger(15);
 
         bossBar = BossBar.bossBar(
-                Color.parse("<gradient:#14ffr8:#96ffbd><b>¡Iniciando en <gold>" + Format.formatTime(time.get()) + "</gold>!"),
+                Color.parse("<gradient:#14ffe8:#96ffbd><b>¡Iniciando en <gold>" + Format.formatTime(time.get()) + "</gold>!"),
                 0.0f,
                 BossBar.Color.YELLOW,
                 BossBar.Overlay.PROGRESS);
@@ -137,7 +137,7 @@ public class GiantGift {
                 return;
             }
 
-            bossBar.name(Color.parse("<gradient:#14ffr8:#96ffbd><b>¡Iniciando en <gold>" + Format.formatTime(currentTime) + "</gold>!"));
+            bossBar.name(Color.parse("<gradient:#14ffe8:#96ffbd><b>¡Iniciando en <gold>" + Format.formatTime(currentTime) + "</gold>!"));
 
         }, 0L, 20L);
     
@@ -152,7 +152,7 @@ public class GiantGift {
 
         AtomicInteger time = new AtomicInteger(60);
 
-        bossBar.name(Color.parse("<gradient:#14ffr8:#96ffbd><b>" + Format.formatTime(time.get())));
+        bossBar.name(Color.parse("<gradient:#14ffe8:#96ffbd><b>" + Format.formatTime(time.get())));
 
         for (UUID playerId : Cl3vent.getInstance().getEventManager().getAllPlayers()) {
             Player p = Bukkit.getPlayer(playerId);
@@ -162,7 +162,7 @@ public class GiantGift {
             }
         }
 
-        Cl3vent.getInstance().getEventManager().showTitle("<aqua><b>Ronda " + round, "<gradient:#14ffr8:#96ffbd><b>¡No te quedes fuera!", 1, 2, 1);
+        Cl3vent.getInstance().getEventManager().showTitle("<aqua><b>Ronda " + round, "<gradient:#14ffe8:#96ffbd><b>¡No te quedes fuera!", 1, 2, 1);
         Cl3vent.getInstance().getEventManager().sendActionBar("<gradient:#ff510d:#ffc800><b>¡Muevete!");
         Cl3vent.getInstance().getEventManager().playSound(Sound.ENTITY_PLAYER_LEVELUP);
 
@@ -174,7 +174,7 @@ public class GiantGift {
             }
 
             if (checkIfAllGiftsAreFull()) {
-                Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffr8:#96ffbd>¡Opps!", "<gradient:#14ffr8:#96ffbd>Se han llenado todos los regalos", 1, 2, 1);
+                Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffe8:#96ffbd>¡Opps!", "<gradient:#14ffe8:#96ffbd>Se han llenado todos los regalos", 1, 2, 1);
                 startNextRound();
                 return;
             }
@@ -185,12 +185,12 @@ public class GiantGift {
             }
 
             if (currentTime == 40) {
-                Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffr8:#96ffbd><b>¡Corre!", "<gradient:#14ffr8:#96ffbd><b>Encuentra espacio en un regalo", 1, 2, 1);
+                Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffe8:#96ffbd><b>¡Corre!", "<gradient:#14ffe8:#96ffbd><b>Encuentra espacio en un regalo", 1, 2, 1);
                 stopSounds();
                 available = true;
             }
 
-            bossBar.name(Color.parse("<gradient:#14ffr8:#96ffbd><b>" + Format.formatTime(currentTime)));
+            bossBar.name(Color.parse("<gradient:#14ffe8:#96ffbd><b>" + Format.formatTime(currentTime)));
 
         }, 0L, 20L);
 
@@ -256,7 +256,7 @@ public class GiantGift {
         AtomicInteger time = new AtomicInteger(60);
         generateCapacities();
 
-        Cl3vent.getInstance().getEventManager().showTitle("<aqua><b>Ronda " + round, "<gradient:#14ffr8:#96ffbd><b>¡No te quedes fuera!", 1, 2, 1);
+        Cl3vent.getInstance().getEventManager().showTitle("<aqua><b>Ronda " + round, "<gradient:#14ffe8:#96ffbd><b>¡No te quedes fuera!", 1, 2, 1);
         Cl3vent.getInstance().getEventManager().sendActionBar("<gradient:#ff510d:#ffc800><b>¡Muevete!");
         Cl3vent.getInstance().getEventManager().playSound(Sound.ENTITY_PLAYER_LEVELUP);
 
@@ -276,7 +276,7 @@ public class GiantGift {
             }
 
             if (checkIfAllGiftsAreFull()) {
-                Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffr8:#96ffbd>¡Opps!", "<gradient:#14ffr8:#96ffbd>Se han llenado todos los regalos", 1, 2, 1);
+                Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffe8:#96ffbd>¡Opps!", "<gradient:#14ffe8:#96ffbd>Se han llenado todos los regalos", 1, 2, 1);
                 startNextRound();
                 return;
             }
@@ -287,7 +287,7 @@ public class GiantGift {
             }
 
             if (currentTime == 40) {
-                Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffr8:#96ffbd><b>¡Corre!", "<gradient:#14ffr8:#96ffbd><b>Encuentra espacio en un regalo", 1, 2, 1);
+                Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffe8:#96ffbd><b>¡Corre!", "<gradient:#14ffe8:#96ffbd><b>Encuentra espacio en un regalo", 1, 2, 1);
                 stopSounds();
                 available = true;
             }
@@ -466,10 +466,10 @@ public class GiantGift {
 
                     if (p != null) {
                         p.setGameMode(org.bukkit.GameMode.SPECTATOR);
-                        p.sendRichMessage("<gradient:#14ffr8:#96ffbd>¡Entraste al regalo a tiempo!");
+                        p.sendRichMessage("<gradient:#14ffe8:#96ffbd>¡Entraste al regalo a tiempo!");
                         p.playSound(p.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
 
-                        Cl3vent.getInstance().getEventManager().sendActionBar("<gradient:#14ffr8:#96ffbd>¡" + p.getName() + " se salvo!");
+                        Cl3vent.getInstance().getEventManager().sendActionBar("<gradient:#14ffe8:#96ffbd>¡" + p.getName() + " se salvo!");
                     }
                 } else {
                     if (gift.isFull()) {

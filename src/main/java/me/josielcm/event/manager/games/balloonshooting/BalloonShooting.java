@@ -82,7 +82,7 @@ public class BalloonShooting {
     public void prepare() {
         points.clear();
 
-        titleMsg = Title.title(Color.parse(title), Color.parse("<gradient:#14ffr8:#96ffbd>¡Dispara a los globos!"));
+        titleMsg = Title.title(Color.parse(title), Color.parse("<gradient:#14ffe8:#96ffbd>¡Dispara a los globos!"));
 
         listener = new BalloonShootingEvents();
 
@@ -112,7 +112,7 @@ public class BalloonShooting {
         final AtomicInteger time = new AtomicInteger(15);
 
         bossBar = BossBar.bossBar(
-                Color.parse("<gradient:#14ffr8:#96ffbd><b>¡Iniciando en <gold>" + Format.formatTime(time.get())
+                Color.parse("<gradient:#14ffe8:#96ffbd><b>¡Iniciando en <gold>" + Format.formatTime(time.get())
                         + "</gold>!"),
                 0.0f,
                 BossBar.Color.YELLOW,
@@ -126,7 +126,7 @@ public class BalloonShooting {
             }
 
             bossBar.name(Color.parse(
-                    "<gradient:#14ffr8:#96ffbd><b>¡Iniciando en <gold>" + Format.formatTime(currentTime) + "</gold>!"));
+                    "<gradient:#14ffe8:#96ffbd><b>¡Iniciando en <gold>" + Format.formatTime(currentTime) + "</gold>!"));
 
         }, 0L, 20L);
     }
@@ -141,7 +141,7 @@ public class BalloonShooting {
 
         final AtomicInteger time = new AtomicInteger(60);
 
-        bossBar.name(Color.parse("<gradient:#14ffr8:#96ffbd><b>" + Format.formatTime(time.get())));
+        bossBar.name(Color.parse("<gradient:#14ffe8:#96ffbd><b>" + Format.formatTime(time.get())));
 
         for (UUID playerId : plugin.getEventManager().getAllPlayers()) {
             Player p = Bukkit.getPlayer(playerId);
@@ -153,7 +153,7 @@ public class BalloonShooting {
 
         giveItems();
 
-        Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffr8:#96ffbd><b>¡Dispara a los globos!", "", 1,
+        Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffe8:#96ffbd><b>¡Dispara a los globos!", "", 1,
                 2, 0);
         Cl3vent.getInstance().getEventManager().playSound(Sound.ENTITY_PLAYER_LEVELUP);
 
@@ -164,7 +164,7 @@ public class BalloonShooting {
                 return;
             }
 
-            bossBar.name(Color.parse("<gradient:#14ffr8:#96ffbd><b>" + Format.formatTime(currentTime)));
+            bossBar.name(Color.parse("<gradient:#14ffe8:#96ffbd><b>" + Format.formatTime(currentTime)));
 
             if (currentTime % 15 == 0) {
                 Bukkit.getScheduler().runTaskLater(plugin, this::regenerateBalloons, 1L);
@@ -172,7 +172,7 @@ public class BalloonShooting {
 
             if (currentTime == 10) {
                 Cl3vent.getInstance().getEventManager()
-                        .sendActionBar("<gradient:#14ffr8:#96ffbd><b>¡Quedan 10 segundos!");
+                        .sendActionBar("<gradient:#14ffe8:#96ffbd><b>¡Quedan 10 segundos!");
                 Cl3vent.getInstance().getEventManager().playSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP);
             }
 
@@ -204,7 +204,7 @@ public class BalloonShooting {
 
         List<UUID> playersToEliminate = get10MenusPoints();
 
-        Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffr8:#96ffbd><b>¡Juego terminado!", "", 1, 3, 1);
+        Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffe8:#96ffbd><b>¡Juego terminado!", "", 1, 3, 1);
         Cl3vent.getInstance().getEventManager().playSound(Sound.ENTITY_WARDEN_HEARTBEAT);
 
         Bukkit.getScheduler().runTask(Cl3vent.getInstance(), () -> {
@@ -300,7 +300,7 @@ public class BalloonShooting {
             p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, 1, 1);
 
             Cl3vent.getInstance().getEventManager()
-                    .sendActionBar("<gradient:#14ffr8:#96ffbd><b>¡" + p.getName() + " ha conseguido un punto doble!");
+                    .sendActionBar("<gradient:#14ffe8:#96ffbd><b>¡" + p.getName() + " ha conseguido un punto doble!");
         } else {
             points.merge(player, 1, Integer::sum);
 
