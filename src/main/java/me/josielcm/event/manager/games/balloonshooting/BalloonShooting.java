@@ -166,7 +166,7 @@ public class BalloonShooting {
 
             bossBar.name(Color.parse("<gradient:#14ffe8:#96ffbd><b>" + Format.formatTime(currentTime)));
 
-            if (currentTime % 15 == 0) {
+            if (currentTime % 20 == 0) {
                 Bukkit.getScheduler().runTaskLater(plugin, this::regenerateBalloons, 1L);
             }
 

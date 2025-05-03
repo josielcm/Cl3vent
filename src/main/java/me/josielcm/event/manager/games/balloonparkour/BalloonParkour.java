@@ -85,7 +85,7 @@ public class BalloonParkour {
 
     @Getter
     @Setter
-    private int maxPlayers = 30;
+    private int maxPlayers = 40;
 
     public void prepare() {
         BalloonParkourEvents eventListener = new BalloonParkourEvents();
@@ -172,6 +172,11 @@ public class BalloonParkour {
         task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
             int currentTime = time.getAndDecrement();
             if (currentTime <= 0) {
+                stop();
+                return;
+            }
+
+            if (reachedPlayers >= maxPlayers) {
                 stop();
                 return;
             }
@@ -307,7 +312,6 @@ public class BalloonParkour {
                 }
             }
 
-            // Process in batches
             final int BATCH_SIZE = 20;
             for (int i = 0; i < activePlayers.size(); i += BATCH_SIZE) {
                 final int startIdx = i;

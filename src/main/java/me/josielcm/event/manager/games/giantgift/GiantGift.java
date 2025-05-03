@@ -106,14 +106,6 @@ public class GiantGift {
             }
         });
 
-        eventManager.getAllPlayers().forEach(player -> {
-            Player p = Bukkit.getPlayer(player);
-            if (p != null) {
-                p.teleport(spawn);
-                p.showTitle(titleMsg);
-            }
-        });
-
         AtomicInteger time = new AtomicInteger(15);
 
         bossBar = BossBar.bossBar(
@@ -125,8 +117,9 @@ public class GiantGift {
         for (UUID playerId : eventManager.getAllPlayers()) {
             Player p = Bukkit.getPlayer(playerId);
             if (p != null) {
-                p.hideBossBar(bossBar);
                 p.showBossBar(bossBar);
+                p.teleport(spawn);
+                p.showTitle(titleMsg);
             }
         }
 
@@ -162,7 +155,7 @@ public class GiantGift {
             }
         }
 
-        Cl3vent.getInstance().getEventManager().showTitle("<aqua><b>Ronda " + round, "<gradient:#14ffe8:#96ffbd><b>¡No te quedes fuera!", 1, 2, 1);
+        Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffe8:#96ffbd><b>Ronda " + round, "<gradient:#14ffe8:#96ffbd><b>¡No te quedes fuera!", 1, 2, 1);
         Cl3vent.getInstance().getEventManager().sendActionBar("<gradient:#ff510d:#ffc800><b>¡Muevete!");
         Cl3vent.getInstance().getEventManager().playSound(Sound.ENTITY_PLAYER_LEVELUP);
 
@@ -242,7 +235,6 @@ public class GiantGift {
                 return;
             }
 
-            bossBar.name(Color.parse("<gradient:#ff510d:#ffc800><b>¡Preparando la próxima ronda!"));
         }, 0L, 20L);
 
     }
@@ -256,7 +248,7 @@ public class GiantGift {
         AtomicInteger time = new AtomicInteger(60);
         generateCapacities();
 
-        Cl3vent.getInstance().getEventManager().showTitle("<aqua><b>Ronda " + round, "<gradient:#14ffe8:#96ffbd><b>¡No te quedes fuera!", 1, 2, 1);
+        Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffe8:#96ffbd><b>Ronda " + round, "<gradient:#14ffe8:#96ffbd><b>¡No te quedes fuera!", 1, 2, 1);
         Cl3vent.getInstance().getEventManager().sendActionBar("<gradient:#ff510d:#ffc800><b>¡Muevete!");
         Cl3vent.getInstance().getEventManager().playSound(Sound.ENTITY_PLAYER_LEVELUP);
 

@@ -51,6 +51,11 @@ public class BalloonParkourEvents implements Listener {
         if (balloonParkour.getSafeContainer() != null &&
                 balloonParkour.getSafeContainer().isInside(loc)) {
             if (!playersInSafeZone.contains(playerId)) {
+                if (balloonParkour.getReachedPlayers() >= balloonParkour.getMaxPlayers()) {
+                    return;
+                }
+
+                balloonParkour.setReachedPlayers(balloonParkour.getReachedPlayers() + 1);
                 playersInSafeZone.add(playerId);
                 balloonParkour.getNoElimination().add(playerId);
                 player.sendRichMessage("<green>¡Has llegado a la zona final! ¡Estás a salvo!");

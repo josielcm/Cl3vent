@@ -59,7 +59,16 @@ public class EventCommand extends BaseCommand {
             Cl3vent.getInstance().getEventManager().revivePlayer(player.getUniqueId());
             sender.sendMessage(Color.parse("<gold>" + player.getName() + " revived!"));
         } else {
-            sender.sendMessage(Color.parse("<red>Player not found!"));
+            if (playerName.equalsIgnoreCase("all")) {
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    if (!Cl3vent.getInstance().getEventManager().getPlayers().contains(p.getUniqueId())) {
+                        Cl3vent.getInstance().getEventManager().revivePlayer(p.getUniqueId());
+                        sender.sendMessage(Color.parse("<gold>" + p.getName() + " revived!"));
+                    }
+                }
+            } else {
+                sender.sendMessage(Color.parse("<red>Player not found!"));
+            }
         }
     }
 
