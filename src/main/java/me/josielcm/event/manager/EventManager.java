@@ -305,7 +305,7 @@ public class EventManager {
         Player p = Bukkit.getPlayer(player);
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(player);
 
-        sendMessage("<gradient:#ff0004:#ffb730:#ff2200>" + offlinePlayer.getName() + " eliminado!</gradient>");
+        sendMessage("<gradient:#ff0004:#ffb730:#ff2200>¡" + offlinePlayer.getName() + " eliminado!</gradient>");
         playSound(Sound.ENTITY_WARDEN_STEP);
 
         players.remove(player);
@@ -334,7 +334,7 @@ public class EventManager {
             } else {
                 p.getInventory().clear();
                 p.setGameMode(org.bukkit.GameMode.SPECTATOR);
-                p.kick(Color.parse("<gold>Gracias por jugar!"));
+                p.kick(Color.parse("<gold>¡Gracias por jugar!"));
             }
         }
 
@@ -345,7 +345,7 @@ public class EventManager {
         Player p = Bukkit.getPlayer(player);
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(player);
 
-        sendMessage("<gradient:#00e1ff:#a3a5ff>" + offlinePlayer.getName() + " ha sido revivido!");
+        sendMessage("<gradient:#00e1ff:#a3a5ff>¡" + offlinePlayer.getName() + " ha sido revivido!");
         playSound(Sound.ENTITY_WARDEN_STEP);
 
         if (p != null) {
