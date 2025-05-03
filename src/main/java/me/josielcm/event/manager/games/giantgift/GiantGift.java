@@ -158,7 +158,7 @@ public class GiantGift {
             Player p = Bukkit.getPlayer(playerId);
             if (p != null) {
                 p.teleport(spawn);
-                p.playSound(p.getLocation(), "ambient.bigregalo", 0.5f, 1.0f);
+                p.playSound(p.getLocation(), "iaalchemy:ambient.bigregalo", 0.5f, 1.0f);
             }
         }
 
@@ -264,7 +264,7 @@ public class GiantGift {
             Player p = Bukkit.getPlayer(playerId);
             if (p != null) {
                 p.teleport(spawn);
-                p.playSound(p.getLocation(), "ambient.bigregalo", 0.5f, 1.0f);
+                p.playSound(p.getLocation(), "iaalchemy:ambient.bigregalo", 0.5f, 1.0f);
             }
         }
 
@@ -292,7 +292,7 @@ public class GiantGift {
                 available = true;
             }
 
-            bossBar.name(Color.parse("<gold><b>" + Format.formatTime(currentTime)));
+            bossBar.name(Color.parse("<gradient:#14ffe8:#96ffbd><b>" + Format.formatTime(currentTime)));
 
         }, 0L, 20L);
     }

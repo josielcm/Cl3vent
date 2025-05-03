@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -36,8 +35,6 @@ public class BalloonParkourEvents implements Listener {
         Player player = ev.getPlayer();
         UUID playerId = player.getUniqueId();
         BalloonParkour balloonParkour = getBalloonParkour();
-
-        Bukkit.getLogger().info("§eProcesando movimiento para: " + player.getName());
 
         if (player.getWorld() != balloonParkour.getWorld()) // player.hasPermission("cl3vent.bypass") ||
             return;
@@ -73,7 +70,6 @@ public class BalloonParkourEvents implements Listener {
             int checkpoint = getCheckpoint(loc);
             if (checkpoint != -1) {
                 int currentCheckpoint = getPlayerCheckpoint(player);
-                // Solo actualizar si es el siguiente checkpoint
                 if (checkpoint == currentCheckpoint + 1) {
                     balloonParkour.reachCheckpoint(player, checkpoint);
                 }

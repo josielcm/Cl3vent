@@ -146,7 +146,7 @@ public class CakeFever {
             Player p = Bukkit.getPlayer(playerId);
             if (p != null) {
                 p.teleport(spawn);
-                p.playSound(p.getLocation(), "ambient.buscatorta", 0.5f, 1.0f);
+                p.playSound(p.getLocation(), "iaalchemy:ambient.buscatorta", 0.5f, 1.0f);
             }
         }
 

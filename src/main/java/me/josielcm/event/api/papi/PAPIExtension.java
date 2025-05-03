@@ -1,5 +1,8 @@
 package me.josielcm.event.api.papi;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -96,7 +99,121 @@ public class PAPIExtension extends PlaceholderExpansion {
             return Cl3vent.getInstance().getEventManager().getActualGame() != null ? Cl3vent.getInstance().getEventManager().getActualGame().name().toUpperCase() : "NONE";
         }
 
-        return null;
+        // %cl3vent_cakefever_topname_#%
+        // %cl3vent_cakefever_top_#%
+
+        // %cl3vent_balloon_topname_#%
+        // %cl3vent_balloon_top_#%
+
+        // %cl3vent_parkour_reached%
+        // %cl3vent_parkour_max%
+
+        if (params.startsWith("cakefever_topname_")) {
+        try {
+            int position = Integer.parseInt(params.substring(18));
+            if (position < 1) return "NONE";
+            
+            var eventManager = Cl3vent.getInstance().getEventManager();
+            if (eventManager.getActualGame() == GameType.CAKEFEVER) {
+                List<UUID> topPlayers = new ArrayList<>(eventManager.getCakeFever().getPoints().entrySet().stream()
+                        .sorted((e1, e2) -> Integer.compare(e2.getValue(), e1.getValue()))
+                        .map(Map.Entry::getKey)
+                        .toList());
+                
+                if (position <= topPlayers.size()) {
+                    UUID playerId = topPlayers.get(position - 1);
+                    OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerId);
+                    return offlinePlayer.getName() != null ? offlinePlayer.getName() : "Unknown";
+                }
+            }
+            return "NONE";
+        } catch (NumberFormatException e) {
+            return "NONE";
+        }
     }
     
+    // CakeFever top player points placeholders
+    if (params.startsWith("cakefever_top_")) {
+        try {
+            int position = Integer.parseInt(params.substring(14));
+            if (position < 1) return "NONE";
+            
+            var eventManager = Cl3vent.getInstance().getEventManager();
+            if (eventManager.getActualGame() == GameType.CAKEFEVER) {
+                List<Map.Entry<UUID, Integer>> topPoints = new ArrayList<>(eventManager.getCakeFever().getPoints().entrySet().stream()
+                        .sorted((e1, e2) -> Integer.compare(e2.getValue(), e1.getValue()))
+                        .toList());
+                
+                if (position <= topPoints.size()) {
+                    return String.valueOf(topPoints.get(position - 1).getValue());
+                }
+            }
+            return "0";
+        } catch (NumberFormatException e) {
+            return "NONE";
+        }
+    }
+    
+    // BalloonShooting top player name placeholders
+    if (params.startsWith("balloon_topname_")) {
+        try {
+            int position = Integer.parseInt(params.substring(16));
+            if (position < 1) return "NONE";
+            
+            var eventManager = Cl3vent.getInstance().getEventManager();
+            if (eventManager.getActualGame() == GameType.BALLONSHOOTING) {
+                List<UUID> topPlayers = eventManager.getBalloonShooting().get5MaxPoints();
+                
+                if (position <= topPlayers.size()) {
+                    UUID playerId = topPlayers.get(position - 1);
+                    OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerId);
+                    return offlinePlayer.getName() != null ? offlinePlayer.getName() : "Unknown";
+                }
+            }
+            return "NONE";
+        } catch (NumberFormatException e) {
+            return "NONE";
+        }
+    }
+    
+    if (params.startsWith("balloon_top_")) {
+        try {
+            int position = Integer.parseInt(params.substring(12));
+            if (position < 1) return "NONE";
+            
+            var eventManager = Cl3vent.getInstance().getEventManager();
+            if (eventManager.getActualGame() == GameType.BALLONSHOOTING) {
+                List<UUID> topPlayers = eventManager.getBalloonShooting().get5MaxPoints();
+                
+                if (position <= topPlayers.size()) {
+                    UUID playerId = topPlayers.get(position - 1);
+                    int points = eventManager.getBalloonShooting().getPoints().getOrDefault(playerId, 0);
+                    return String.valueOf(points);
+                }
+            }
+            return "0";
+        } catch (NumberFormatException e) {
+            return "NONE";
+        }
+    }
+    
+    if (params.equals("parkour_reached")) {
+        var eventManager = Cl3vent.getInstance().getEventManager();
+        if (eventManager.getActualGame() == GameType.BALLOONPARKOUR) {
+            int reached = eventManager.getBalloonParkour().getReachedPlayers();
+            return String.valueOf(reached);
+        }
+        return "0";
+    }
+    
+    if (params.equals("parkour_max")) {
+        var eventManager = Cl3vent.getInstance().getEventManager();
+        if (eventManager.getActualGame() == GameType.BALLOONPARKOUR) {
+            return String.valueOf(eventManager.getBalloonParkour().getMaxPlayers());
+        }
+        return "0";
+    }
+
+    return null;
+    }    
 }

@@ -79,6 +79,14 @@ public class BalloonParkour {
     @Setter
     private BossBar bossBar;
 
+    @Getter
+    @Setter
+    private int reachedPlayers = 0;
+
+    @Getter
+    @Setter
+    private int maxPlayers = 30;
+
     public void prepare() {
         BalloonParkourEvents eventListener = new BalloonParkourEvents();
         this.listener = eventListener;
@@ -90,6 +98,7 @@ public class BalloonParkour {
         players.clear();
         noElimination.clear();
         visibility.clear();
+        reachedPlayers = 0;
 
         final Cl3vent plugin = Cl3vent.getInstance();
         final Set<UUID> eventPlayers = plugin.getEventManager().getPlayers();
@@ -156,7 +165,7 @@ public class BalloonParkour {
             Player p = Bukkit.getPlayer(playerId);
             if (p != null) {
                 p.teleport(spawn);
-                p.playSound(p.getLocation(), "ambient.parkour", 0.5f, 1.0f);
+                p.playSound(p.getLocation(), "iaalchemy:ambient.parkour", 0.5f, 1.0f);
             }
         }
 
@@ -204,6 +213,7 @@ public class BalloonParkour {
         players.clear();
         noElimination.clear();
         visibility.clear();
+        reachedPlayers = 0;
 
         Cl3vent.getInstance().getEventManager().stop();
     }

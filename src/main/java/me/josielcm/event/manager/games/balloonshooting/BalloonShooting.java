@@ -147,7 +147,7 @@ public class BalloonShooting {
             Player p = Bukkit.getPlayer(playerId);
             if (p != null) {
                 p.teleport(spawn);
-                p.playSound(p.getLocation(), "ambient.globos", 0.5f, 1.0f);
+                p.playSound(p.getLocation(), "iaalchemy:ambient.globos", 0.5f, 1.0f);
             }
         }
 
