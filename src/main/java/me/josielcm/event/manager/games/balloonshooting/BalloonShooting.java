@@ -139,7 +139,7 @@ public class BalloonShooting {
 
         regenerateBalloons();
 
-        final AtomicInteger time = new AtomicInteger(60);
+        final AtomicInteger time = new AtomicInteger(600);
 
         bossBar.name(Color.parse("<gradient:#14ffe8:#96ffbd><b>" + Format.formatTime(time.get())));
 

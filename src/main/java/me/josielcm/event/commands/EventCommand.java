@@ -91,7 +91,7 @@ public class EventCommand extends BaseCommand {
     @CommandCompletion("@players")
     public void onKill(CommandSender sender, String nickname) {
         Player player = Bukkit.getPlayer(nickname);
-
+ 
         if (player != null) {
             if (!Cl3vent.getInstance().getEventManager().getPlayers().contains(player.getUniqueId())) {
                 sender.sendMessage(Color.parse("<red>Player is already dead!"));

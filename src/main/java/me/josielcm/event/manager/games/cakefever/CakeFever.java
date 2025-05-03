@@ -139,7 +139,7 @@ public class CakeFever {
         }
 
         final Cl3vent plugin = Cl3vent.getInstance();
-        final AtomicInteger time = new AtomicInteger(60);
+        final AtomicInteger time = new AtomicInteger(600);
 
         bossBar.name(Color.parse("<gradient:#14ffe8:#96ffbd><b>" + Format.formatTime(time.get())));
 

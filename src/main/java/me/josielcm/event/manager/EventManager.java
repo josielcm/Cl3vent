@@ -328,6 +328,11 @@ public class EventManager {
         }
 
         if (p != null) {
+
+            if (p.getName().equalsIgnoreCase("C13ement") || p.getName().equalsIgnoreCase("Adyboyy_") || p.getName().equalsIgnoreCase(".xNorkL")) {
+                return;
+            }
+
             if (p.hasPermission("cl3vent.twitch")) {
                 p.getInventory().clear();
                 p.setGameMode(org.bukkit.GameMode.SPECTATOR);

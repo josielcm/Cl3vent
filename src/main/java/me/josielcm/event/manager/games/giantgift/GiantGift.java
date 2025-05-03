@@ -143,7 +143,7 @@ public class GiantGift {
 
         generateCapacities();
 
-        AtomicInteger time = new AtomicInteger(60);
+        AtomicInteger time = new AtomicInteger(120);
 
         bossBar.name(Color.parse("<gradient:#14ffe8:#96ffbd><b>" + Format.formatTime(time.get())));
 
@@ -246,7 +246,7 @@ public class GiantGift {
         }
         task = null;
 
-        AtomicInteger time = new AtomicInteger(60);
+        AtomicInteger time = new AtomicInteger(120);
         generateCapacities();
 
         Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffe8:#96ffbd><b>Ronda " + round, "<gradient:#14ffe8:#96ffbd><b>¡No te quedes fuera!", 1, 2, 1);

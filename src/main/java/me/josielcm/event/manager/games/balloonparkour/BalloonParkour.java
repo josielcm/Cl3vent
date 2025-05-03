@@ -154,7 +154,7 @@ public class BalloonParkour {
         giveItemsOptimized();
 
         final Cl3vent plugin = Cl3vent.getInstance();
-        final AtomicInteger time = new AtomicInteger(330);
+        final AtomicInteger time = new AtomicInteger(900);
 
         Cl3vent.getInstance().getEventManager().showTitle("<gradient:#14ffe8:#96ffbd>¡El juego ha comenzado!", "", 1, 2, 1);
         Cl3vent.getInstance().getEventManager().playSound(Sound.ENTITY_PLAYER_LEVELUP);
