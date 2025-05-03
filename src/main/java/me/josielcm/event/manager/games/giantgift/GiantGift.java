@@ -163,6 +163,7 @@ public class GiantGift {
             Player p = Bukkit.getPlayer(playerId);
             if (p != null) {
                 p.teleport(spawn);
+                p.setGameMode(org.bukkit.GameMode.ADVENTURE);
             }
         }
 
@@ -385,6 +386,15 @@ public class GiantGift {
                 }
             }
         }
+    }
+
+    public boolean isSafePlayer(UUID uuid) {
+        for (Gift gift : gifts) {
+            if (gift.getPlayers().contains(uuid)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

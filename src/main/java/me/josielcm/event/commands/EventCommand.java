@@ -1,8 +1,8 @@
 package me.josielcm.event.commands;
 
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.CommandHelp;
@@ -45,11 +45,16 @@ public class EventCommand extends BaseCommand {
     @Subcommand("revive")
     @CommandPermission("cl3vent.command")
     public void onRevive(CommandSender sender, String playerName) {
-        OfflinePlayer player = Bukkit.getOfflinePlayer(playerName);
+        Player player = Bukkit.getPlayer(playerName);
 
         if (player != null) {
+            if (Cl3vent.getInstance().getEventManager().getPlayers().contains(player.getUniqueId())) {
+                sender.sendMessage(Color.parse("<red>Player is not dead!"));
+                return;
+            }
+
             Cl3vent.getInstance().getEventManager().revivePlayer(player.getUniqueId());
-            sender.sendMessage(Color.parse("<green>Player revived!"));
+            sender.sendMessage(Color.parse("<gold>" + player.getName() + " revived!"));
         } else {
             sender.sendMessage(Color.parse("<red>Player not found!"));
         }

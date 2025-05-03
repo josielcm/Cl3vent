@@ -16,12 +16,20 @@ public class GiantGiftEvents implements Listener {
             return;
         }
 
+        if (ev.getPlayer().getGameMode() == org.bukkit.GameMode.SPECTATOR) { // || ev.getPlayer().hasPermission("cl3vent.bypass")
+            return;
+        }
+
         Cl3vent plugin = Cl3vent.getInstance();
         EventManager eventManager = plugin.getEventManager();
-
+        
         Location loc = ev.getTo().clone();
 
         if (eventManager.getGiantGift().isGift(loc)) {
+            if (eventManager.getGiantGift().isSafePlayer(ev.getPlayer().getUniqueId())) {
+                return;
+            }
+
             eventManager.getGiantGift().safePlayer(ev.getPlayer().getUniqueId(), loc);
         }
 

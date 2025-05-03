@@ -310,6 +310,23 @@ public class EventManager {
 
         players.remove(player);
 
+        switch (actualGame) {
+            case CAKEFEVER:
+                cakeFever.getPoints().remove(player);
+                break;
+            case BALLOONPARKOUR:
+                balloonParkour.getPlayers().remove(player);
+                break;
+            case BALLONSHOOTING:
+                balloonShooting.getPoints().remove(player);
+                break;
+            case GIANTGIFT:
+                giantGift.getPlayers().remove(player);
+                break;
+            default:
+                break;
+        }
+
         if (p != null) {
             if (p.hasPermission("cl3vent.twitch")) {
                 p.getInventory().clear();
@@ -328,7 +345,7 @@ public class EventManager {
         Player p = Bukkit.getPlayer(player);
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(player);
 
-        sendMessage("<aqua>" + offlinePlayer.getName() + " <green>revivido!");
+        sendMessage("<aqua>" + offlinePlayer.getName() + " revivido!");
         playSound(Sound.ENTITY_WARDEN_STEP);
 
         if (p != null) {

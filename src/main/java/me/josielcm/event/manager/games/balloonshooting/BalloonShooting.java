@@ -291,7 +291,7 @@ public class BalloonShooting {
         } else {
             points.merge(player, 1, Integer::sum);
             
-            p.sendActionBar(Color.parse("<aqua>+1"));
+            p.sendActionBar(Color.parse("<aqua><b>+1"));
             p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, 1, 1);
         }
     }
