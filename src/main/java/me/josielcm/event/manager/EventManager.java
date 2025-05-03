@@ -234,7 +234,7 @@ public class EventManager {
         giantGift.setWorld(Bukkit.getWorld(worldS));
         giantGift.setLimitElimination(FileManager.getGiantgift().getInt("settings.limit-elimination"));
 
-        Log.log(LogLevel.INFO, "CakeFever loaded with " + cakes.size() + " cakes");
+        Log.log(LogLevel.INFO, "CakeFever loaded with " + cakes.size() + " cakes and ");
         Log.log(LogLevel.INFO, "BalloonParkour loaded with " + checkpoints.size() + " checkpoints");
         Log.log(LogLevel.INFO,
                 "BalloonShooting loaded with region: " + pos1.getBlockX() + ", " + pos1.getBlockY() + ", "
