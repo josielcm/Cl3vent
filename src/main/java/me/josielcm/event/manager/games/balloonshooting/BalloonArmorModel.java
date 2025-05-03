@@ -1,18 +1,20 @@
 package me.josielcm.event.manager.games.balloonshooting;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.scheduler.BukkitTask;
 
 import lombok.Getter;
 import me.josielcm.event.Cl3vent;
-import me.josielcm.event.api.items.ItemBuilder;
 
 public class BalloonArmorModel {
 
@@ -30,6 +32,9 @@ public class BalloonArmorModel {
 
     @Getter
     private BukkitTask task;
+
+    @Getter
+    private boolean isGold = false;
 
     public BalloonArmorModel(Location pos1, Location pos2) {
         if (pos1 == null || pos2 == null) {
@@ -145,11 +150,31 @@ public class BalloonArmorModel {
         armorStand.setBasePlate(false);
         armorStand.setGlowing(true);
         
-        ItemStack balloonTextured = new ItemStack(Material.SLIME_BALL);
-        ItemMeta meta = balloonTextured.getItemMeta();
+        ItemStack balloonTextured = new ItemStack(Material.LEATHER_HELMET);
+        LeatherArmorMeta meta = (LeatherArmorMeta) balloonTextured.getItemMeta();
 
         if (meta != null) {
-            meta.setCustomModelData(10000);
+            meta.setCustomModelData(10001);
+
+            List<Color> colors = new ArrayList<>();
+
+            colors.add(Color.fromRGB(93, 226, 231));
+            colors.add(Color.fromRGB(125, 218, 88));
+            colors.add(Color.fromRGB(228, 8, 10));
+            colors.add(Color.fromRGB(255, 1, 149));
+            colors.add(Color.fromRGB(92, 246, 200));
+            colors.add(Color.fromRGB(239, 195, 202));
+            colors.add(Color.fromRGB(60, 80, 252));
+            colors.add(Color.fromRGB(255, 215, 0)); // GOLD
+
+            Color randomColor = colors.get(ThreadLocalRandom.current().nextInt(colors.size()));
+
+            if (randomColor == Color.fromRGB(255, 215, 0)) {
+                isGold = true;
+            }
+
+            meta.setColor(randomColor);
+
             balloonTextured.setItemMeta(meta);
         }
 
