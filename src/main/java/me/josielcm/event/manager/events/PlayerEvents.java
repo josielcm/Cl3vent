@@ -8,6 +8,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import me.josielcm.event.Cl3vent;
+import me.josielcm.event.api.formats.Color;
 import me.josielcm.event.manager.EventManager;
 
 public class PlayerEvents implements Listener {
@@ -25,6 +26,8 @@ public class PlayerEvents implements Listener {
             ev.getPlayer().setGameMode(GameMode.ADVENTURE);
             ev.getPlayer().getInventory().clear();
         }
+
+        ev.joinMessage(Color.parse(""));
     }
 
     @EventHandler
@@ -51,6 +54,8 @@ public class PlayerEvents implements Listener {
             default:
                 break;
         }
+
+        ev.quitMessage(Color.parse(""));
     }
 
 }
