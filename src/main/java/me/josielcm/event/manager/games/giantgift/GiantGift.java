@@ -48,7 +48,7 @@ public class GiantGift {
 
     @Getter
     @Setter
-    private int limitElimination = 0;
+    private int limitElimination = 20;
 
     @Getter
     @Setter
@@ -205,6 +205,7 @@ public class GiantGift {
         }
 
         round++;
+        available = false;
 
         if (elimination >= limitElimination) {
             end();
@@ -311,6 +312,8 @@ public class GiantGift {
                 p.stopAllSounds();
             }
         }
+
+        available = false;
 
         players.clear();
         clearGiftsPlayers();

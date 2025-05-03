@@ -25,14 +25,14 @@ public class GiantGiftEvents implements Listener {
         
         Location loc = ev.getTo().clone();
 
-        if (!eventManager.getGiantGift().isAvailable()) {
-            ev.getPlayer().sendRichMessage("<red>Aún no se puede entrar a los regalos.");
-            ev.getPlayer().teleport(eventManager.getGiantGift().getSpawn());
-            return;
-        }
-
         if (eventManager.getGiantGift().isGift(loc)) {
             if (eventManager.getGiantGift().isSafePlayer(ev.getPlayer().getUniqueId())) {
+                return;
+            }
+
+            if (!eventManager.getGiantGift().isAvailable()) {
+                ev.getPlayer().sendRichMessage("<red>Aún no se puede entrar a los regalos.");
+                ev.getPlayer().teleport(eventManager.getGiantGift().getSpawn());
                 return;
             }
 
