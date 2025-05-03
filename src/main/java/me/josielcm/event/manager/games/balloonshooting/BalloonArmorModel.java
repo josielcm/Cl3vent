@@ -172,7 +172,7 @@ public class BalloonArmorModel {
         LeatherArmorMeta meta = (LeatherArmorMeta) balloonTextured.getItemMeta();
 
         if (meta != null) {
-            meta.setCustomModelData(10001);
+            meta.setCustomModelData(369);
 
             List<Color> colors = new ArrayList<>();
 
